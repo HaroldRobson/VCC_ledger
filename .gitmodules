@@ -1,0 +1,3 @@
+[submodule "MAIN/smartcontracts/VCC_ledger/lib/forge-std"]
+	path = MAIN/smartcontracts/VCC_ledger/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std

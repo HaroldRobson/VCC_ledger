@@ -1,0 +1,1 @@
+/Users/johnjohnson/hackathonprojects/VCC_ledger/RateMyVcc/algorithm/rust/RateMyVcc/target/release/RateMyVcc: /Users/johnjohnson/hackathonprojects/VCC_ledger/RateMyVcc/algorithm/rust/RateMyVcc/src/main.rs

@@ -1,0 +1,1 @@
+- The section for our webapp which integrate with metamask and has buy and retire buttons

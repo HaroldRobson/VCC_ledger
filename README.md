@@ -5,7 +5,7 @@
 ### What we do differently
 
 - **Lower fees** - traditional brokers charge 20 to 40%
-- **Fractional retireirement** - retire less than one tonne of carbon at once.
+- **Fractional retirement** - retire less than one tonne of carbon at once.
 - **Full transparency** - know exactly what credits you are buying, and their quality.
 - **NFT receipts** - receive receipts from Verra in the form of NFTs.
 

@@ -1,6 +1,6 @@
 # CBX.earth
 
-- Voluntary Carbon Credit (VCC) custodial ledger with on chain fractional retirement.
+**Voluntary Carbon Credit (VCC) custodial ledger with on chain fractional retirement.**
 
 ### What we do differently
 

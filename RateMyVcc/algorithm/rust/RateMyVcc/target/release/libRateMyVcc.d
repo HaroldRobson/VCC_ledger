@@ -1,0 +1,1 @@
+/Users/johnjohnson/hackathonprojects/VCC_ledger/RateMyVcc/algorithm/rust/RateMyVcc/target/release/libRateMyVcc.dylib: /Users/johnjohnson/hackathonprojects/VCC_ledger/RateMyVcc/algorithm/rust/RateMyVcc/src/lib.rs

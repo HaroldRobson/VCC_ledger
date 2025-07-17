@@ -7,6 +7,7 @@
             rel="stylesheet"
             href="https://cdn.jsdelivr.net/npm/@exampledev/new.css@1.1.2/new.min.css"
         />
+        <link rel="stylesheet" href="style.css">
         <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
         <script defer="" src="app.js"></script>
     </head>
@@ -15,19 +16,20 @@
             <h1>Whatever app name idk atm</h1>
         </header>
         <p id="status"></p>
-        <p>
-            <input
-                id="carbonAmount"
-                type="number"
-                min="1"
-                placeholder="Carbon credits amount"
-            />
-        </p>
-        <p>
-            <button id="buyBtn">Buy</button>
-            <button id="retireBtn">Retire</button>
-        </p>
-        <p id="wallet"></p>
+        <div id="menu">
+            <p>
+                <input
+                    id="carbonAmount"
+                    type="number"
+                    min="1"
+                    placeholder="Carbon credits amount"
+                />
+            </p>
+            <p>
+                <button id="buyBtn">Buy</button>
+                <button id="retireBtn">Retire</button>
+            </p>
+        </div>
     </body>
 </html>
 

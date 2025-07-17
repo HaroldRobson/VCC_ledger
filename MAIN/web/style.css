@@ -1,0 +1,13 @@
+#menu {
+    height: 0;
+    opacity: 0;
+    transform: translateY(20px);
+    overflow: hidden;
+    transition: opacity .5s, transform .5s;
+}
+
+#menu.visible {
+    height: auto;
+    opacity: 1;
+    transform: none;
+}

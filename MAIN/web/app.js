@@ -26,11 +26,13 @@ window.addEventListener("DOMContentLoaded", async () => {
             $status.textContent = `Connected wallet: ${account}`;
 
             contract = new web3.eth.Contract(contractABI, contractAddress);
+            
+            $("menu").classList.add("visible");
 
             $("buyBtn").addEventListener("click", buyCredit);
             $("retireBtn").addEventListener("click", retireCredit);
         } catch (err) {
-            alert(err);
+            console.error(err);
             $status.textContent = "Error with MetaMask connection.";
         }
     } else {

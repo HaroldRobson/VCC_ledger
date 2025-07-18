@@ -138,46 +138,7 @@ export function HowItWorksSection() {
           </motion.div>
         </div>
 
-        {/* Call to Action */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          viewport={{ once: false }}
-          className="text-center mt-20"
-        >
-          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-12 max-w-4xl mx-auto">
-            <h4 className="text-3xl font-bold text-white mb-4">
-              Ready to Experience the Future?
-            </h4>
-            <p className="text-xl text-gray-400 mb-8">
-              Join thousands of people who already use CBX. Get transparent and efficient carbon offsetting.
-            </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-green-400 mb-2">2-5%</div>
-                <div className="text-gray-400">Lower Fees</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-blue-400 mb-2">NFT</div>
-                <div className="text-gray-400">Proof Receipts</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-purple-400 mb-2">0.01+</div>
-                <div className="text-gray-400">Min Tonnes</div>
-              </div>
-            </div>
-            
-            <button 
-              onClick={() => document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' })}
-              className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105 flex items-center justify-center mx-auto"
-            >
-              Get Early Access
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </button>
-          </div>
-        </motion.div>
+
       </div>
     </section>
   );

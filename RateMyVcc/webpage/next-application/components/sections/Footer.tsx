@@ -6,36 +6,27 @@ import { Twitter, Github, Linkedin, Mail } from 'lucide-react';
 export function Footer() {
   const footerLinks = {
     Product: [
-      { name: 'Features', href: '#' },
       { name: 'Rate Credits', href: '#rate-credits' },
       { name: 'How it Works', href: '#how-it-works' },
-      { name: 'Pricing', href: '#' },
-    ],
-    Resources: [
-      { name: 'Documentation', href: '#' },
-      { name: 'API Reference', href: '#' },
-      { name: 'Support', href: '#' },
-      { name: 'Blog', href: '#' },
+      { name: 'Features', href: '#' },
     ],
     Company: [
       { name: 'About', href: '#' },
-      { name: 'Careers', href: '#' },
-      { name: 'Contact', href: '#' },
-      { name: 'Press', href: '#' },
+      { name: 'Contact', href: '#waitlist' },
+      { name: 'Blog', href: '#' },
     ],
     Legal: [
       { name: 'Privacy Policy', href: '#' },
       { name: 'Terms of Service', href: '#' },
       { name: 'Cookie Policy', href: '#' },
-      { name: 'GDPR', href: '#' },
     ],
   };
 
   const socialLinks = [
     { icon: Twitter, href: '#', label: 'Twitter' },
-    { icon: Github, href: '#', label: 'GitHub' },
     { icon: Linkedin, href: '#', label: 'LinkedIn' },
-    { icon: Mail, href: '#', label: 'Email' },
+    { icon: Github, href: '#', label: 'GitHub' },
+    { icon: Mail, href: '#waitlist', label: 'Contact' },
   ];
 
   return (

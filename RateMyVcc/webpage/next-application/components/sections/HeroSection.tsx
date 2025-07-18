@@ -41,7 +41,7 @@ export function HeroSection() {
             <svg className="absolute w-full h-full" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
               {/* Path 1: Left - MOVED SLIGHTLY HIGHER */}
               <path
-                d="M 500 10 C 500 110, 200 360, 550 530"
+                d="M 50 100 C 300 250, 250 460, 550 510"
                 fill="none"
                 stroke="currentColor"
                 className="text-green-500"
@@ -50,13 +50,13 @@ export function HeroSection() {
                 strokeLinecap="round"
               />
               {/* Icon 1: Positioned at the new end of the path */}
-              <g transform="translate(550, 530) rotate(55) scale(1.7)">
+              <g transform="translate(569, 518) rotate(80) scale(1.7)">
                 <path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3C7.14 19.87 7.64 20 8 20c11 0 14-17 14-17-1 2-8 2.25-13 3.25S2 11.5 2 13.5c0 2 1.75 3.75 1.75 3.75C7 8 17 8 17 8z" fill="currentColor" className="text-green-500" transform="translate(-12, -12)" />
               </g>
 
               {/* Path 2: Right - REDRAWN to curve up from bottom right */}
               <path
-                d="M 1000 880 C 1300 700, 1200 550, 1050 600"
+                d="M 1600 900 C 700 450, 1300 500, 1050 600"
                 fill="none"
                 stroke="currentColor"
                 className="text-green-500"
@@ -65,7 +65,7 @@ export function HeroSection() {
                 strokeLinecap="round"
               />
               {/* Icon 2: Positioned at the new end of the path */}
-              <g transform="translate(1050, 600) rotate(-45) scale(1.7)">
+              <g transform="translate(1020, 610) rotate(-145) scale(1.7)">
                  <path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3C7.14 19.87 7.64 20 8 20c11 0 14-17 14-17-1 2-8 2.25-13 3.25S2 11.5 2 13.5c0 2 1.75 3.75 1.75 3.75C7 8 17 8 17 8z" fill="currentColor" className="text-green-500" transform="translate(-12, -12)" />
               </g>
             </svg>

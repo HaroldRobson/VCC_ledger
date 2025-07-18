@@ -29,7 +29,6 @@ export function Navigation() {
     { name: 'Rate Credits', href: '#rate-credits' },
     { name: 'Comparison', href: '#comparison' },
     { name: 'How it Works', href: '#how-it-works' },
-    { name: 'Contact', href: '#contact' },
   ];
 
   const scrollToSection = (href: string) => {
@@ -61,19 +60,21 @@ export function Navigation() {
           </motion.div>
 
           {/* Desktop Navigation - Center */}
-          <div className="hidden md:flex items-center space-x-8">
-            {navItems.map((item, index) => (
-              <motion.button
-                key={item.name}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                onClick={() => scrollToSection(item.href)}
-                className="text-gray-300 hover:text-white transition-colors duration-200 font-medium"
-              >
-                {item.name}
-              </motion.button>
-            ))}
+          <div className="hidden md:flex items-center justify-center flex-1">
+            <div className="flex items-center space-x-8">
+              {navItems.map((item, index) => (
+                <motion.button
+                  key={item.name}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  onClick={() => scrollToSection(item.href)}
+                  className="text-gray-300 hover:text-white transition-colors duration-200 font-medium"
+                >
+                  {item.name}
+                </motion.button>
+              ))}
+            </div>
           </div>
 
           {/* Right Side - Waitlist Button and Theme Toggle */}
@@ -83,7 +84,7 @@ export function Navigation() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               onClick={scrollToWaitlist}
-              className="hidden md:flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 mr-4"
+              className="hidden md:flex items-center bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-6 py-2 rounded-full font-medium transition-all duration-300 hover:scale-105 mr-4"
             >
               Waitlist
               <ArrowRight className="ml-2 w-4 h-4" />

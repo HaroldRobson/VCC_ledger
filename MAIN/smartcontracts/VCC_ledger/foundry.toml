@@ -2,9 +2,14 @@
 src = "src"
 out = "out"
 libs = ["lib"]
+remappings = ['@openzeppelin=lib/openzeppelin-contracts']
 
+
+fork_url = "https://node.mainnet.etherlink.com"
+fork_block_number = 21256952
 
 
 [rpc_endpoints]
 etherlink_testnet = "https://rpc.ankr.com/etherlink_testnet"
+etherlink_mainnet = "https://node.mainnet.etherlink.com"
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

@@ -49,12 +49,13 @@ export function Navigation() {
     }`}>
       <div className="absolute inset-0" style={{ backgroundColor: scrolled ? 'rgba(23, 23, 23, 0.8)' : 'transparent' }} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 relative">
+        <div className="flex items-center justify-between h-20 relative">
           {/* Logo - Left Side */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center"
+            transition={{ duration: 0.3 }}
+            className="flex items-center -ml-4"
           >
             <span className="text-4xl font-bold text-white">CBX</span>
           </motion.div>
@@ -65,11 +66,11 @@ export function Navigation() {
               {navItems.map((item, index) => (
                 <motion.button
                   key={item.name}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  onClick={() => scrollToSection(item.href)}
-                  className="text-gray-300 hover:text-white transition-colors duration-200 font-medium"
+                                  initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05, duration: 0.3 }}
+                onClick={() => scrollToSection(item.href)}
+                className="text-gray-300 hover:text-white transition-colors duration-100 font-medium"
                 >
                   {item.name}
                 </motion.button>
@@ -78,22 +79,30 @@ export function Navigation() {
           </div>
 
           {/* Right Side - Waitlist Button and Theme Toggle */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 mr-4">
             {/* Waitlist Button */}
             <motion.button
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
               onClick={scrollToWaitlist}
-              className="hidden md:flex items-center bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-6 py-2 rounded-full font-medium transition-all duration-300 hover:scale-105 mr-4"
+              whileHover={{ scale: 1.02 }}
+              className="hidden md:flex items-center bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-2 rounded-full font-medium transition-all duration-100 mr-4 group"
             >
-              Waitlist
-              <ArrowRight className="ml-2 w-4 h-4" />
+              <span style={{ color: '#04221b' }}>Waitlist</span>
+              <motion.div
+                className="ml-2"
+                whileHover={{ x: 2 }}
+                transition={{ duration: 0.1 }}
+              >
+                <ArrowRight className="w-5 h-5" style={{ color: '#04221b' }} />
+              </motion.div>
             </motion.button>
 
             {/* Theme Toggle - Just Icon */}
             <button
               onClick={() => setIsDark(!isDark)}
-              className="p-2 text-gray-300 hover:text-white transition-colors duration-200"
+              className="p-2 text-gray-300 hover:text-white transition-colors duration-100"
               aria-label="Toggle theme"
             >
               {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -102,7 +111,7 @@ export function Navigation() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="md:hidden p-2 text-gray-300 hover:text-white transition-colors duration-200"
+              className="md:hidden p-2 text-gray-300 hover:text-white transition-colors duration-100"
             >
               {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -114,6 +123,7 @@ export function Navigation() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
             className="md:hidden border-t border-gray-800"
             style={{ backgroundColor: '#171717' }}
           >
@@ -122,17 +132,17 @@ export function Navigation() {
                 <button
                   key={item.name}
                   onClick={() => scrollToSection(item.href)}
-                  className="block w-full text-left px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
+                  className="block w-full text-left px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-100"
                 >
                   {item.name}
                 </button>
               ))}
               <button
                 onClick={scrollToWaitlist}
-                className="flex items-center w-full px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md font-medium transition-colors duration-200"
+                className="flex items-center w-full px-3 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-md font-medium transition-colors duration-100"
               >
-                Waitlist
-                <ArrowRight className="ml-2 w-4 h-4" />
+                <span style={{ color: '#0a531c' }}>Waitlist</span>
+                <ArrowRight className="ml-2 w-4 h-4" style={{ color: '#0a531c' }} />
               </button>
             </div>
           </motion.div>

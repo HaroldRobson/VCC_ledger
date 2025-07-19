@@ -21,16 +21,6 @@ export function HeroSection() {
         {/* Background Elements - Correctly Layered */}
         <div className="absolute inset-0">
           {/* 1. Subtle grid pattern (Bottom layer) */}
-          <div
-            className="absolute inset-0 bg-repeat opacity-[0.02]"
-            style={{
-              backgroundImage: `
-                linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px)
-              `,
-              backgroundSize: '100px 100px'
-            }}
-          />
           
           {/* 2. Dark gradient overlay (Middle layer) */}
           {/* <div className="absolute inset-0 z-[1] bg-gradient-to-br from-gray-50/95 via-gray-100/90 to-gray-50/95 dark:from-gray-900/95 dark:via-gray-900/90 dark:to-gray-900/95" /> */}
@@ -41,31 +31,31 @@ export function HeroSection() {
             <svg className="absolute w-full h-full" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
               {/* Path 1: Left - MOVED SLIGHTLY HIGHER */}
               <path
-                d="M 50 100 C 300 250, 250 460, 550 510"
+                d="M79 285C-31 137 351 202 438 370"
                 fill="none"
                 stroke="currentColor"
                 className="text-green-500"
                 strokeWidth="2"
-                strokeDasharray="4 14"
+                strokeDasharray="6 8"
                 strokeLinecap="round"
               />
               {/* Icon 1: Positioned at the new end of the path */}
-              <g transform="translate(569, 518) rotate(80) scale(1.7)">
+              <g transform="translate(453, 383) rotate(100) scale(1.7)">
                 <path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3C7.14 19.87 7.64 20 8 20c11 0 14-17 14-17-1 2-8 2.25-13 3.25S2 11.5 2 13.5c0 2 1.75 3.75 1.75 3.75C7 8 17 8 17 8z" fill="currentColor" className="text-green-500" transform="translate(-12, -12)" />
               </g>
 
               {/* Path 2: Right - REDRAWN to curve up from bottom right */}
               <path
-                d="M 1600 900 C 700 450, 1300 500, 1050 600"
-                fill="none"
+    d="M1530 592C1627 740 1222 758 1118 589"
+    fill="none"
                 stroke="currentColor"
                 className="text-green-500"
                 strokeWidth="2"
-                strokeDasharray="4 14"
+                strokeDasharray="6 8"
                 strokeLinecap="round"
               />
               {/* Icon 2: Positioned at the new end of the path */}
-              <g transform="translate(1020, 610) rotate(-145) scale(1.7)">
+              <g transform="translate(1105, 570) rotate(-70) scale(1.7)">
                  <path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3C7.14 19.87 7.64 20 8 20c11 0 14-17 14-17-1 2-8 2.25-13 3.25S2 11.5 2 13.5c0 2 1.75 3.75 1.75 3.75C7 8 17 8 17 8z" fill="currentColor" className="text-green-500" transform="translate(-12, -12)" />
               </g>
             </svg>
@@ -152,6 +142,8 @@ export function HeroSection() {
                 <div className="text-gray-600 dark:text-gray-400 text-sm">Retirement receipts</div>
               </div>
             </motion.div>
+
+            
           </div>
         </div>
 

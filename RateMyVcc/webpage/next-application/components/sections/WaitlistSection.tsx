@@ -60,17 +60,19 @@ export function WaitlistSection() {
               transition={{ duration: 0.6, delay: 0.4 }}
               viewport={{ once: false }}
               onSubmit={handleSubmit}
-              className="max-w-2xl mx-auto"
+              className="max-w-4xl mx-auto"
             >
               <div className="flex flex-col md:flex-row gap-4 items-stretch">
-                <input
-                  type="email"
-                  placeholder="Enter your email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="flex-1 px-6 py-4 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-green-500 focus:outline-none text-lg"
-                />
+                <div className="flex-1 relative">
+                  <input
+                    type="email"
+                    placeholder="Enter your email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full pl-6 pr-6 py-4 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-green-500 focus:outline-none text-lg"
+                  />
+                </div>
                 <Button
                   type="submit"
                   disabled={isLoading || !email.trim()}

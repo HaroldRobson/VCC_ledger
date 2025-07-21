@@ -8,14 +8,13 @@ export default function App() {
 }
 
 // Custom hook to detect when an element is in the viewport
-const useInView = (options) => {
-  const ref = useRef(null);
+const useInView = (options: IntersectionObserverInit): [React.RefObject<HTMLDivElement>, boolean] => {
+  const ref = useRef<HTMLDivElement>(null);
   const [isInView, setIsInView] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
       // Update state based on whether element is in view.
-      // This will make the animation re-trigger every time.
       setIsInView(entry.isIntersecting);
     }, options);
 
@@ -36,12 +35,20 @@ const useInView = (options) => {
 
 
 // A helper component for consistent row styling and height
-const ComparisonRow = ({ children, className = '' }) => (
+interface ComparisonRowProps {
+  children: React.ReactNode;
+  className?: string;
+}
+const ComparisonRow: React.FC<ComparisonRowProps> = ({ children, className = '' }) => (
   <div className={`h-16 flex items-center ${className}`}>{children}</div>
 );
 
 // A new component to wrap each row and apply the animation
-const AnimatedRow = ({ children, index }) => {
+interface AnimatedRowProps {
+  children: React.ReactNode;
+  index: number;
+}
+const AnimatedRow: React.FC<AnimatedRowProps> = ({ children, index }) => {
   const [ref, isInView] = useInView({ threshold: 0.1 });
 
   const style = {
@@ -114,10 +121,12 @@ export function ProblemSolutionSection() {
 
         {/* Main Comparison Table Container */}
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-3 items-start gap-x-8">
+          {/* Changed gap from gap-x-8 to gap-x-4 to bring columns closer */}
+          <div className="grid grid-cols-3 items-start gap-x-12">
             
-            {/* Column 1: Feature Labels (Left Aligned and shifted right) */}
-            <div className="text-left pl-4">
+            {/* Column 1: Feature Labels (Right aligned to be closer to the center column) */}
+            {/* Changed text-left to text-right and pl-4 to pr-8 for better alignment */}
+            <div className="text-right pr-8">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -134,7 +143,8 @@ export function ProblemSolutionSection() {
                     transition={{ duration: 0.6, delay: 0.4 + (index * 0.1) }}
                     viewport={{ once: false }}
                   >
-                    <ComparisonRow className="justify-start">
+                    {/* Changed justify-start to justify-end */}
+                    <ComparisonRow className="justify-end">
                       <span className="text-gray-800 dark:text-gray-300 font-medium text-lg">
                         {comparison.feature}
                       </span>

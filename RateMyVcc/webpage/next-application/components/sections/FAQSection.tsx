@@ -5,12 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 
 export function FAQSection() {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const faqs = [
     {
-      question: 'What makes CBX.earth different from other carbon credit platforms?',
-      answer: 'CBX.earth lets you retire any amount of carbon credits, not just whole tonnes. We charge much lower fees than traditional brokers (who charge 20-40%). You get full transparency through our rating system. Every retirement comes with an NFT receipt. We built everything on Etherlink L2 to keep costs low.',
+      question: 'What makes CBX different from other carbon credit platforms?',
+      answer: 'CBX lets you retire any amount of carbon credits, not just whole tonnes. We charge much lower fees than traditional brokers (who charge 20-40%). You get full transparency through our rating system. Every retirement comes with an NFT receipt. We built everything on Etherlink L2 to keep costs low.',
     },
     {
       question: 'How does fractional retirement work?',

@@ -139,7 +139,7 @@ export function ContactSection() {
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title="CBX.earth Office Location"
+                title="CBX Office Location"
               />
             </div>
             <p className="text-gray-400 text-sm mt-4">

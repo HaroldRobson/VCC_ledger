@@ -32,7 +32,7 @@ export interface LocalBusinessData {
 }
 
 export const businessData: LocalBusinessData = {
-  name: "CBX.earth",
+  name: "CBX",
   description: "Revolutionary carbon credit platform offering fractional retirement with blockchain verification and NFT receipts.",
   address: {
     streetAddress: "London",

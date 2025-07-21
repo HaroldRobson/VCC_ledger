@@ -7,7 +7,7 @@ export interface GoogleBusinessConfig {
 
 export const googleBusinessConfig: GoogleBusinessConfig = {
   placeId: 'YOUR_GOOGLE_PLACE_ID', // Replace with actual Place ID
-  businessName: 'CBX.earth',
+  businessName: 'CBX',
   apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 };
 
@@ -58,7 +58,7 @@ export function generateBusinessProfileWidget() {
           "@type": "Rating",
           "ratingValue": "5"
         },
-        "reviewBody": "Excellent service and transparent carbon offsetting. CBX.earth made it easy for our company to achieve carbon neutrality."
+        "reviewBody": "Excellent service and transparent carbon offsetting. CBX made it easy for our company to achieve carbon neutrality."
       }
     ]
   };

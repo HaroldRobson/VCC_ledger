@@ -110,7 +110,7 @@ export function WaitlistSection() {
             </h3>
             
             <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
-              We'll email you first when CBX.earth launches. Get ready for lower fees and transparent carbon credits.
+              We'll email you first when CBX launches. Get ready for lower fees and transparent carbon credits.
             </p>
 
             <Button

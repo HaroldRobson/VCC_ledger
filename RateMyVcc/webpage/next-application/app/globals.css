@@ -29,7 +29,7 @@ body:not(.dark) {
 }
 
 .dark {
-  --foreground-rgb: 255, 255, 255;
+    --foreground-rgb: 255, 255, 255;
   --background-start-rgb: 23, 23, 23;
   --background-end-rgb: 23, 23, 23;
 }

@@ -50,7 +50,7 @@ export function HeroSection() {
               {/* Path 2: Right - REDRAWN to curve up from bottom right */}
               <path
     d="M1530 592C1627 740 1222 758 1118 589"
-    fill="none"
+                fill="none"
                 stroke="currentColor"
                 className="text-green-500"
                 strokeWidth="2"
@@ -151,9 +151,9 @@ export function HeroSection() {
         </div>
 
         {/* Scroll Indicator */}
-                  <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
             transition={{ duration: 0.15, delay: 0.25 }}
           className="absolute bottom-8 left-1/2 transform -translate-x-1/2 cursor-pointer z-10"
           onClick={scrollToNext}

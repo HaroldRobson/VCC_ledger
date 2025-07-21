@@ -12,7 +12,7 @@ export function TestimonialsSection() {
       name: 'Sarah Chen',
       role: 'Sustainability Director',
       company: 'GreenTech Solutions',
-      content: 'CBX.earth has revolutionized how we approach carbon offsetting. The transparency and NFT receipts give us complete confidence in our environmental impact.',
+      content: 'CBX has revolutionized how we approach carbon offsetting. The transparency and NFT receipts give us complete confidence in our environmental impact.',
       rating: 5,
       avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=400',
     },
@@ -91,7 +91,7 @@ export function TestimonialsSection() {
             What Our Users Say
           </h2>
           <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-            Join thousands of organizations and individuals who trust CBX.earth 
+            Join thousands of organizations and individuals who trust CBX 
             for their carbon offsetting needs.
           </p>
         </motion.div>

@@ -9,7 +9,7 @@ import { Navigation } from '@/components/ui/Navigation';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white" style={{ backgroundColor: '#171717' }}>
+    <div className="min-h-screen bg-white dark:bg-[#171717]">
       <Navigation />
       <HeroSection />
       <RateMyVCCSection />

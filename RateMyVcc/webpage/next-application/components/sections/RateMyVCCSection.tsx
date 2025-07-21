@@ -109,7 +109,7 @@ export function RateMyVCCSection() {
   };
 
   return (
-    <section id="rate-credits" className="py-20 md:py-32 relative overflow-hidden font-sans" style={{ backgroundColor: '#171717' }}>
+    <section id="rate-credits" className="py-20 md:py-32 relative overflow-hidden font-sans bg-white dark:bg-[#171717]">
       {/* Background Grid */}
       <div className="absolute inset-0 opacity-[0.03]">
         <div className="absolute inset-0" style={{
@@ -140,9 +140,9 @@ export function RateMyVCCSection() {
           <motion.p
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.15, delay: 0.1 }}
             viewport={{ once: false }}
-            className="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed"
+            className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed"
           >
             Want to check a carbon credit's quality? Enter any Verra Registry ID below. 
             You'll get an instant score from 1-100. Our system checks the project's 
@@ -154,7 +154,7 @@ export function RateMyVCCSection() {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
+          transition={{ duration: 0.15, delay: 0.15 }}
           viewport={{ once: false }}
           className="mb-12 md:mb-16"
         >
@@ -163,14 +163,14 @@ export function RateMyVCCSection() {
             <div className="flex flex-col md:flex-row gap-4 items-stretch">
               {/* Search Input */}
               <div className="flex-1 relative">
-                <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
+                <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-gray-500" />
                 <input
                   type="text"
                   placeholder="Try 'VCS-1396' or 'Katingan Peatland'"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  className="w-full pl-14 pr-6 py-4 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-green-500 focus:outline-none text-lg"
+                  className="w-full pl-14 pr-6 py-4 bg-white dark:bg-[#232323] border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 focus:border-green-500 focus:outline-none text-lg"
                 />
               </div>
               
@@ -223,7 +223,7 @@ export function RateMyVCCSection() {
                   key={credit.id}
                   initial={{ opacity: 0, y: 30, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  transition={{ duration: 0.15, delay: index * 0.02 }}
                 >
                   <Card className="bg-gray-800/80 backdrop-blur-sm border border-gray-700 hover:border-gray-600 transition-all duration-300 group overflow-hidden rounded-2xl">
                     <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -257,7 +257,7 @@ export function RateMyVCCSection() {
                           <motion.div
                             initial={{ scale: 0, rotate: -180 }}
                             animate={{ scale: 1, rotate: 0 }}
-                            transition={{ duration: 0.8, delay: 0.3, type: "spring", stiffness: 100 }}
+                            transition={{ duration: 0.2, delay: 0.1, type: "spring", stiffness: 200 }}
                             className={`w-32 h-32 rounded-full bg-gradient-to-br ${getScoreGradient(credit.score)} p-1 shadow-lg`}
                           >
                             <div className="w-full h-full bg-gray-800 rounded-full flex items-center justify-center relative overflow-hidden">
@@ -270,13 +270,13 @@ export function RateMyVCCSection() {
                                 <motion.div
                                   initial={{ opacity: 0 }}
                                   animate={{ opacity: 1 }}
-                                  transition={{ duration: 0.5, delay: 0.8 }}
+                                  transition={{ duration: 0.15, delay: 0.2 }}
                                   className={`text-4xl font-bold ${getScoreColor(credit.score)}`}
                                 >
                                   <motion.span
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
-                                    transition={{ duration: 1, delay: 1 }}
+                                    transition={{ duration: 0.15, delay: 0.25 }}
                                   >
                                     {credit.score}
                                   </motion.span>
@@ -315,7 +315,7 @@ export function RateMyVCCSection() {
                                 <motion.div
                                   initial={{ width: 0 }}
                                   animate={{ width: '85%' }}
-                                  transition={{ duration: 1, delay: 1.2, ease: "easeOut" }}
+                                  transition={{ duration: 0.15, delay: 0.3, ease: "easeOut" }}
                                   className="h-full bg-gradient-to-r from-green-500 to-emerald-400"
                                 />
                               </div>
@@ -330,7 +330,7 @@ export function RateMyVCCSection() {
                                 <motion.div
                                   initial={{ width: 0 }}
                                   animate={{ width: '92%' }}
-                                  transition={{ duration: 1, delay: 1.4, ease: "easeOut" }}
+                                  transition={{ duration: 0.15, delay: 0.35, ease: "easeOut" }}
                                   className="h-full bg-gradient-to-r from-green-500 to-emerald-400"
                                 />
                               </div>
@@ -345,7 +345,7 @@ export function RateMyVCCSection() {
                                 <motion.div
                                   initial={{ width: 0 }}
                                   animate={{ width: '88%' }}
-                                  transition={{ duration: 1, delay: 1.6, ease: "easeOut" }}
+                                  transition={{ duration: 0.15, delay: 0.4, ease: "easeOut" }}
                                   className="h-full bg-gradient-to-r from-green-500 to-emerald-400"
                                 />
                               </div>

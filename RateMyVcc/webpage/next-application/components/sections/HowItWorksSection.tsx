@@ -33,7 +33,7 @@ export function HowItWorksSection() {
   ];
 
   return (
-    <section id="how-it-works" className="py-32" style={{ backgroundColor: '#171717' }}>
+    <section id="how-it-works" className="py-32 bg-white dark:bg-[#171717]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
           {/* Left Side - Title and Description */}
@@ -47,7 +47,7 @@ export function HowItWorksSection() {
             <motion.h2
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0 }}
+              transition={{ duration: 0.15, delay: 0 }}
               viewport={{ once: false }}
               className="text-5xl md:text-6xl font-bold leading-tight mb-8"
             >
@@ -58,9 +58,9 @@ export function HowItWorksSection() {
             <motion.p
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              transition={{ duration: 0.15, delay: 0.05 }}
               viewport={{ once: false }}
-              className="text-xl text-gray-400 leading-relaxed mb-8"
+              className="text-xl text-gray-600 dark:text-gray-400 leading-relaxed mb-8"
             >
               We revolutionize carbon credit markets through blockchain technology, 
               making fractional retirement accessible with full transparency and lower fees.
@@ -128,7 +128,7 @@ export function HowItWorksSection() {
                     <h3 className="text-2xl font-bold text-white mb-3">
                       {step.title}
                     </h3>
-                    <p className="text-gray-400 leading-relaxed text-lg">
+                    <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-lg">
                       {step.description}
                     </p>
                   </div>

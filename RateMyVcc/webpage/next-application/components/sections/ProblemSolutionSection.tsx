@@ -94,7 +94,7 @@ export function ProblemSolutionSection() {
   ];
 
   return (
-    <section className="py-24" style={{ backgroundColor: '#171717' }}>
+    <section className="py-24 bg-white dark:bg-[#171717]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
@@ -105,9 +105,8 @@ export function ProblemSolutionSection() {
         >
             <div className="text-center mb-20">
             <h2 className="text-6xl md:text-7xl font-bold text-white mb-6">
-                Why{' '}
                 <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-                CBX
+                Why CBX
                 </span>
             </h2>
             </div>
@@ -136,7 +135,7 @@ export function ProblemSolutionSection() {
                     viewport={{ once: false }}
                   >
                     <ComparisonRow className="justify-start">
-                      <span className="text-gray-300 font-medium text-lg">
+                      <span className="text-gray-800 dark:text-gray-300 font-medium text-lg">
                         {comparison.feature}
                       </span>
                     </ComparisonRow>
@@ -207,7 +206,7 @@ export function ProblemSolutionSection() {
                         <svg className="w-6 h-6 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                         </svg>
-                        <span className="text-gray-400 text-base">
+                        <span className="text-gray-600 dark:text-gray-400 text-base">
                           {comparison.traditional}
                         </span>
                       </div>

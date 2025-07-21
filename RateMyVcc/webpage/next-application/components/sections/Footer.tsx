@@ -30,7 +30,7 @@ export function Footer() {
   ];
 
   return (
-    <footer style={{ backgroundColor: '#171717' }}>
+    <footer className="bg-white dark:bg-[#171717]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
           {/* Logo and Description */}
@@ -42,7 +42,7 @@ export function Footer() {
               viewport={{ once: true }}
               className="mb-6"
             >
-              <p className="text-gray-400 leading-relaxed text-sm">
+              <p className="text-gray-700 dark:text-gray-400 leading-relaxed text-sm">
                 The leading carbon credit platform. Retire any amount of credits. 
                 Get blockchain verification and complete transparency.
               </p>
@@ -56,13 +56,13 @@ export function Footer() {
                   href={social.href}
                   initial={{ opacity: 0, scale: 0 }}
                   whileInView={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                  transition={{ duration: 0.15, delay: index * 0.02 }}
                   viewport={{ once: true }}
                   whileHover={{ scale: 1.1 }}
-                  className="w-10 h-10 bg-gray-800 border border-gray-700 rounded-lg flex items-center justify-center hover:bg-green-600 hover:border-green-600 transition-colors duration-200"
+                  className="w-10 h-10 bg-gray-200 dark:bg-[#232323] border border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center hover:bg-green-600 hover:border-green-600 transition-colors duration-200"
                   aria-label={social.label}
                 >
-                  <social.icon className="w-5 h-5 text-gray-400 hover:text-white" />
+                  <social.icon className="w-5 h-5 text-gray-600 dark:text-gray-400 hover:text-white" />
                 </motion.a>
               ))}
             </div>
@@ -74,7 +74,7 @@ export function Footer() {
               key={category}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: categoryIndex * 0.1 }}
+              transition={{ duration: 0.15, delay: categoryIndex * 0.02 }}
               viewport={{ once: true }}
             >
               <h3 className="text-lg font-semibold mb-4 text-white">{category}</h3>
@@ -83,7 +83,7 @@ export function Footer() {
                   <li key={linkIndex}>
                     <a
                       href={link.href}
-                      className="text-gray-400 hover:text-white transition-colors duration-200"
+                      className="text-gray-900 dark:text-gray-400 hover:text-green-500 dark:hover:text-green-400 transition-colors duration-200"
                     >
                       {link.name}
                     </a>
@@ -98,15 +98,15 @@ export function Footer() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
+          transition={{ duration: 0.15, delay: 0.1 }}
           viewport={{ once: true }}
           className="border-t border-gray-200 dark:border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center"
         >
-          <p className="text-gray-400 text-sm">
+          <p className="text-gray-600 dark:text-gray-400 text-sm">
             © 2024 CBX.earth. All rights reserved.
           </p>
           <div className="flex items-center space-x-4 mt-4 md:mt-0">
-            <span className="text-gray-400 text-sm">Powered by</span>
+            <span className="text-gray-600 dark:text-gray-400 text-sm">Powered by</span>
             <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full text-sm font-medium">
               Etherlink L2
             </div>

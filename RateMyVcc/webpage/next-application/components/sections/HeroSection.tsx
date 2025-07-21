@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 
 export function HeroSection() {
   const scrollToNext = () => {
-    const nextSection = document.getElementById('rate-credits');
+    const nextSection = document.getElementById('how-it-works');
     nextSection?.scrollIntoView({ behavior: 'smooth' });
   };
 
@@ -17,17 +17,20 @@ export function HeroSection() {
   };
 
   return (
-      <section id="home" className="bg-background">
+      <section id="home" className="bg-white dark:bg-[#171717]">
         {/* Background Elements - Correctly Layered */}
         <div className="absolute inset-0">
           {/* 1. Subtle grid pattern (Bottom layer) */}
           
-          {/* 2. Dark gradient overlay (Middle layer) */}
-          {/* <div className="absolute inset-0 z-[1] bg-gradient-to-br from-gray-50/95 via-gray-100/90 to-gray-50/95 dark:from-gray-900/95 dark:via-gray-900/90 dark:to-gray-900/95" /> */}
-           <div className="absolute inset-0 z-[1]" style={{ background: 'linear-gradient(135deg, rgba(23,23,23,0.95) 0%, rgba(23,23,23,0.90) 50%, rgba(23,23,23,0.95) 100%)' }} />
+          {/* 2. No gradient overlay needed - using section bg color */}
 
-          {/* 3. STATIC graphics (Top background layer, above gradient) */}
-          <div className="absolute inset-0 z-[2] overflow-hidden">
+          {/* 3. ANIMATED graphics (Top background layer, above gradient) */}
+          <motion.div 
+            className="absolute inset-0 z-[2] overflow-hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2, delay: 0.1 }}
+          >
             <svg className="absolute w-full h-full" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
               {/* Path 1: Left - MOVED SLIGHTLY HIGHER */}
               <path
@@ -59,7 +62,7 @@ export function HeroSection() {
                  <path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3C7.14 19.87 7.64 20 8 20c11 0 14-17 14-17-1 2-8 2.25-13 3.25S2 11.5 2 13.5c0 2 1.75 3.75 1.75 3.75C7 8 17 8 17 8z" fill="currentColor" className="text-green-500" transform="translate(-12, -12)" />
               </g>
             </svg>
-          </div>
+          </motion.div>
         </div>
 
         {/* Content - Sits on top of all background elements */}
@@ -68,10 +71,10 @@ export function HeroSection() {
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
+              transition={{ duration: 0.15, delay: 0 }} // Start immediately
               className="mb-8"
             >
-              <span className="inline-flex items-center px-4 py-2 bg-green-500/10 text-green-400 rounded-full text-sm font-medium border border-green-500/20">
+              <span className="inline-flex items-center px-4 py-2 bg-green-500 text-gray-900 rounded-full text-sm font-medium shadow-lg">
                 <Leaf className="w-4 h-4 mr-2" />
                 Powered by Etherlink L2
               </span>
@@ -80,7 +83,7 @@ export function HeroSection() {
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
+              transition={{ duration: 0.15, delay: 0.05 }}
               className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight"
             >
               The Future of Carbon Credits is{' '}
@@ -92,7 +95,7 @@ export function HeroSection() {
             <motion.p
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
+              transition={{ duration: 0.15, delay: 0.1 }}
               className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed"
             >
               Retire carbon credits in any amount you want. Get blockchain verification 
@@ -102,7 +105,7 @@ export function HeroSection() {
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.8 }}
+              transition={{ duration: 0.15, delay: 0.15 }}
               className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16"
             >
               <Button
@@ -126,18 +129,18 @@ export function HeroSection() {
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 1.0 }}
+              transition={{ duration: 0.15, delay: 0.2 }}
               className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto"
             >
-              <div className="text-center p-6 bg-white/80 dark:bg-gray-800/30 backdrop-blur-sm rounded-2xl border border-gray-200/50 dark:border-gray-700/50">
+              <div className="text-center">
                 <div className="text-3xl font-bold text-green-400 mb-2">20-40%</div>
                 <div className="text-gray-600 dark:text-gray-400 text-sm">Lower fees than brokers</div>
               </div>
-              <div className="text-center p-6 bg-white/80 dark:bg-gray-800/30 backdrop-blur-sm rounded-2xl border border-gray-200/50 dark:border-gray-700/50">
+              <div className="text-center">
                 <div className="text-3xl font-bold text-green-400 mb-2">100%</div>
                 <div className="text-gray-600 dark:text-gray-400 text-sm">Transparent quality</div>
               </div>
-              <div className="text-center p-6 bg-white/80 dark:bg-gray-800/30 backdrop-blur-sm rounded-2xl border border-gray-200/50 dark:border-gray-700/50">
+              <div className="text-center">
                 <div className="text-3xl font-bold text-green-400 mb-2">NFT</div>
                 <div className="text-gray-600 dark:text-gray-400 text-sm">Retirement receipts</div>
               </div>
@@ -148,10 +151,10 @@ export function HeroSection() {
         </div>
 
         {/* Scroll Indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 1.2 }}
+                  <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.15, delay: 0.25 }}
           className="absolute bottom-8 left-1/2 transform -translate-x-1/2 cursor-pointer z-10"
           onClick={scrollToNext}
         >

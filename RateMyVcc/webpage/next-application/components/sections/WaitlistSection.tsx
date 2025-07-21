@@ -25,7 +25,7 @@ export function WaitlistSection() {
   };
 
   return (
-    <section id="waitlist" className="py-24" style={{ backgroundColor: '#171717' }}>
+    <section id="waitlist" className="py-24 bg-white dark:bg-[#171717]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         {!isSubmitted ? (
           <motion.div
@@ -37,9 +37,9 @@ export function WaitlistSection() {
             <motion.h2
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0 }}
+              transition={{ duration: 0.15, delay: 0 }}
               viewport={{ once: false }}
-              className="text-5xl md:text-6xl font-bold text-white mb-6"
+              className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6"
             >
               Join the Waitlist
             </motion.h2>
@@ -47,9 +47,9 @@ export function WaitlistSection() {
             <motion.p
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              transition={{ duration: 0.15, delay: 0.05 }}
               viewport={{ once: false }}
-              className="text-xl text-gray-400 mb-12 max-w-2xl mx-auto"
+              className="text-xl text-gray-600 dark:text-gray-400 mb-12 max-w-2xl mx-auto"
             >
               Be among the first to experience the future of carbon credits.
             </motion.p>
@@ -57,7 +57,7 @@ export function WaitlistSection() {
             <motion.form
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
+              transition={{ duration: 0.15, delay: 0.1 }}
               viewport={{ once: false }}
               onSubmit={handleSubmit}
               className="max-w-4xl mx-auto"
@@ -70,7 +70,7 @@ export function WaitlistSection() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full pl-6 pr-6 py-4 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-green-500 focus:outline-none text-lg"
+                    className="w-full pl-6 pr-6 py-4 bg-white dark:bg-[#232323] border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 focus:border-green-500 focus:outline-none text-lg"
                   />
                 </div>
                 <Button
@@ -109,7 +109,7 @@ export function WaitlistSection() {
               Welcome to CBX Early Access!
             </h3>
             
-            <p className="text-lg text-gray-400 mb-8">
+            <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
               We'll email you first when CBX.earth launches. Get ready for lower fees and transparent carbon credits.
             </p>
 

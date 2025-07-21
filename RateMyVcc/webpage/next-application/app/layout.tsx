@@ -29,11 +29,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <LocalSEO />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Prevent FOUC by setting dark mode immediately
+              document.documentElement.classList.add('dark');
+              document.documentElement.style.backgroundColor = '#171717';
+              // Also set body class when available
+              document.addEventListener('DOMContentLoaded', function() {
+                document.body.classList.add('dark');
+              });
+            `,
+          }}
+        />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={`${inter.className} dark`}>
+        {children}
+      </body>
     </html>
   );
 }

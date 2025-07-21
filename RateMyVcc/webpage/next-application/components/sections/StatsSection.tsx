@@ -121,7 +121,7 @@ export function StatsSection() {
           className="text-center mt-16"
         >
           <div className="bg-gray-800 border border-gray-700 rounded-2xl p-8 max-w-4xl mx-auto">
-            <h3 className="text-2xl font-bold text-white mb-4">
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">
               Powered by Etherlink L2
             </h3>
             <p className="text-gray-400 text-lg">

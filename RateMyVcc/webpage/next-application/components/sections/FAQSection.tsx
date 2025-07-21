@@ -39,7 +39,7 @@ export function FAQSection() {
   };
 
   return (
-    <section id="faq" className="py-32" style={{ backgroundColor: '#171717' }}>
+    <section id="faq" className="py-32 bg-white dark:bg-[#171717]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
           {/* Left Side - Title (takes up 5 columns) */}
@@ -51,10 +51,9 @@ export function FAQSection() {
             className="lg:col-span-5 lg:sticky lg:top-32"
           >
             <h2 className="text-6xl md:text-7xl font-bold leading-tight">
-              <span className="text-white">Frequently Asked</span>
               <br />
               <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-                Questions
+              Frequently Asked Questions
               </span>
             </h2>
           </motion.div>
@@ -75,20 +74,20 @@ export function FAQSection() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: false }}
               >
-                <div className="bg-transparent border border-gray-600 rounded-2xl hover:border-gray-500 transition-all duration-300 overflow-hidden">
+                <div className="bg-transparent border border-gray-300 dark:border-gray-600 rounded-2xl hover:border-gray-400 dark:hover:border-gray-500 transition-all duration-300 overflow-hidden">
                   <button
                     onClick={() => toggleFAQ(index)}
-                    className="w-full p-6 text-left flex items-center justify-between hover:bg-gray-800/30 transition-colors duration-200"
+                    className="w-full p-6 text-left flex items-center justify-between hover:bg-gray-100/50 dark:hover:bg-gray-800/30 transition-colors duration-200"
                   >
-                    <span className="text-lg font-medium text-gray-300 pr-4 leading-relaxed">
+                    <span className="text-lg font-medium text-gray-800 dark:text-gray-300 pr-4 leading-relaxed">
                       {faq.question}
                     </span>
                     <motion.div
                       animate={{ rotate: openIndex === index ? 180 : 0 }}
                       transition={{ duration: 0.3 }}
-                      className="flex-shrink-0 w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center"
+                      className="flex-shrink-0 w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center"
                     >
-                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                      <ChevronDown className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                     </motion.div>
                   </button>
                   
@@ -100,8 +99,8 @@ export function FAQSection() {
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.3 }}
                       >
-                        <div className="px-6 pb-6 border-t border-gray-700">
-                          <p className="text-gray-400 leading-relaxed pt-4">
+                        <div className="px-6 pb-6 border-t border-gray-300 dark:border-gray-700">
+                          <p className="text-gray-600 dark:text-gray-400 leading-relaxed pt-4">
                             {faq.answer}
                           </p>
                         </div>

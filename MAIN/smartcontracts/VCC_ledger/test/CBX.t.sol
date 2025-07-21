@@ -11,6 +11,8 @@ contract CBXTest is Test {
     address public user1;
     address public user2;
     
+    // USDC address from your contract
+    address constant USDC = 0x796Ea11Fa2dD751eD01b53C372fFDB4AAa8f00F9;
     uint256 constant INITIAL_FEE = 300; // 3% fee
     
     function setUp() public {
@@ -19,6 +21,18 @@ contract CBXTest is Test {
         user2 = makeAddr("user2");
         
         cbx = new CBX(INITIAL_FEE);
+        
+        // Mock USDC balances
+        vm.mockCall(
+            USDC,
+            abi.encodeWithSelector(IERC20.balanceOf.selector, user1),
+            abi.encode(100000 * 10**6) // 100k USDC
+        );
+        vm.mockCall(
+            USDC,
+            abi.encodeWithSelector(IERC20.balanceOf.selector, user2),
+            abi.encode(100000 * 10**6) // 100k USDC
+        );
     }
     
     function testInitialState() public {
@@ -29,66 +43,125 @@ contract CBXTest is Test {
         assertEq(cbx.totalSupply(), 0);
     }
     
-    function testMinting() public {
-        uint256 amountToMint = 1000;
-        uint256 pricePerCredit = 500; // $5.00 in cents
+    function testMintingCredits() public {
+        uint256 creditsToMint = 10; // 10 carbon credits
+        uint256 pricePerCredit = 5 * 10**6; // $5.00 per credit in USDC
         
-        cbx.mint(amountToMint, pricePerCredit);
+        cbx.mint(creditsToMint, pricePerCredit);
         
-        assertEq(cbx.totalSupply(), amountToMint);
-        assertEq(cbx.reserves(), amountToMint);
-        assertEq(cbx.pricePerToken(), pricePerCredit);
-        assertEq(cbx.balanceOf(address(cbx)), amountToMint);
+        // Check tokens minted (100 tokens per credit)
+        assertEq(cbx.totalSupply(), creditsToMint * 100);
+        assertEq(cbx.reserves(), creditsToMint * 100);
+        assertEq(cbx.pricePerToken(), pricePerCredit / 100); // $0.05 per token
+        assertEq(cbx.balanceOf(address(cbx)), creditsToMint * 100);
         
-        uint256 priceWithFee = cbx.getPricePerTokenWithFee();
-        assertEq(priceWithFee, 515); 
+        // Check price with fee
+        uint256 pricePerCreditWithFee = cbx.getUSDCPricePerCreditWithFee();
+        assertEq(pricePerCreditWithFee, 5.15 * 10**6); // $5.15 with 3% fee
+        
+        uint256 pricePerTokenWithFee = cbx.getUSDCPricePerTokenWithFee();
+        assertEq(pricePerTokenWithFee, 51500); // $0.0515 with 3% fee
     }
     
-    
-    
-    function testPriceCalculation() public {
-        // Test weighted average price calculation
-        cbx.mint(1000, 500); // 1000 CBX at $5.00
-        assertEq(cbx.pricePerToken(), 500);
+    function testWeightedAveragePrice() public {
+        // First mint: 10 credits at $5
+        cbx.mint(10, 5 * 10**6);
+        assertEq(cbx.pricePerToken(), 50000); // $0.05 per token
         
-        cbx.mint(1000, 600); // Another 1000 CBX at $6.00
-        // New price should be: (500*1000 + 600*1000) / 2000 = 550
-        assertEq(cbx.pricePerToken(), 550);
-        assertEq(cbx.reserves(), 2000);
+        // Second mint: 20 credits at $8
+        cbx.mint(20, 8 * 10**6);
+        
+        // Weighted average: (50000 * 1000 + 80000 * 2000) / 3000 = 70000
+        assertEq(cbx.pricePerToken(), 70000); // $0.07 per token
+        assertEq(cbx.reserves(), 3000); // 30 credits = 3000 tokens
+        
+        // Third mint: 30 credits at $6
+        cbx.mint(30, 6 * 10**6);
+        
+        // New weighted average: (70000 * 3000 + 60000 * 3000) / 6000 = 65000
+        assertEq(cbx.pricePerToken(), 65000); // $0.065 per token
+        assertEq(cbx.reserves(), 6000); // 60 credits = 6000 tokens
     }
     
-    function testFeeCalculation() public {
-        cbx.mint(1000, 500);
+    function testBuyTokensWithUSDC() public {
+        // Mint 10 credits at $5
+        cbx.mint(10, 5 * 10**6);
         
-        uint256 basePrice = cbx.pricePerToken(); // 500
-        uint256 priceWithFee = cbx.getPricePerTokenWithFee();
-        
-        // 3% fee
-        assertEq(priceWithFee, 515);
-        
-        // Test fee change
-        cbx.setFee(500); // 5% fee
-        uint256 newPriceWithFee = cbx.getPricePerTokenWithFee();
-        assertEq(newPriceWithFee, 525); 
-    }
-    
-    function testPurchaseWillFailWithoutUSDC() public {
-        cbx.mint(100, 500);
-        
+        // User1 buys 200 tokens (2 credits)
         vm.startPrank(user1);
+        uint256 tokensToBuy = 200;
+        uint256 pricePerTokenWithFee = cbx.getUSDCPricePerTokenWithFee();
+        uint256 totalCost = tokensToBuy * pricePerTokenWithFee;
         
-        // This will fail because user1 has no USDC
-        vm.expectRevert();
-        cbx.buyTokensWithUSDC(10);
+        // User approves CBX contract to spend their USDC
+        vm.mockCall(
+            USDC,
+            abi.encodeWithSelector(IERC20.approve.selector, address(cbx), totalCost),
+            abi.encode(true)
+        );
+        IERC20(USDC).approve(address(cbx), totalCost);
         
+        // Mock that the transferFrom will succeed when CBX contract calls it
+        vm.mockCall(
+            USDC,
+            abi.encodeWithSelector(IERC20.transferFrom.selector, user1, address(cbx), totalCost),
+            abi.encode(true)
+        );
+        
+        // Buy tokens
+        cbx.buyTokensWithUSDC(tokensToBuy);
+        
+        // Verify token transfer
+        assertEq(cbx.balanceOf(user1), tokensToBuy);
+        assertEq(cbx.reserves(), 800); // 1000 - 200
         vm.stopPrank();
     }
     
-    function testAccessControl() public { // a bit pointless imo but good for piece of mind
+    function testPriceCalculationWithDifferentFees() public {
+        cbx.mint(10, 5 * 10**6); // 10 credits at $5
+        
+        // Test with 3% fee
+        uint256 basePrice = cbx.pricePerToken(); // 50000 ($0.05)
+        uint256 priceWithFee = cbx.getUSDCPricePerTokenWithFee();
+        assertEq(priceWithFee, 51500); // $0.0515 with 3% fee
+        
+        // Test with 0% fee
+        cbx.setFee(0);
+        assertEq(cbx.getUSDCPricePerTokenWithFee(), 50000);
+        assertEq(cbx.getUSDCPricePerCreditWithFee(), 5 * 10**6);
+        
+        // Test with 10% fee
+        cbx.setFee(1000);
+        assertEq(cbx.getUSDCPricePerTokenWithFee(), 55000); // $0.055
+        assertEq(cbx.getUSDCPricePerCreditWithFee(), 5.5 * 10**6); // $5.50
+    }
+    
+    function testWithdrawUSDC() public {
+        // Mock initial USDC balance of contract
+        vm.mockCall(
+            USDC,
+            abi.encodeWithSelector(IERC20.balanceOf.selector, address(cbx)),
+            abi.encode(1000 * 10**6) // 1000 USDC in contract
+        );
+        
+        // Mock transfer to owner
+        vm.mockCall(
+            USDC,
+            abi.encodeWithSelector(IERC20.transfer.selector, owner, 1000 * 10**6),
+            abi.encode(true)
+        );
+        
+        // Withdraw
+        vm.expectEmit(true, true, true, true);
+        emit CBX.withdrawnUSDC(1000 * 10**6);
+        cbx.withDrawUSDC();
+    }
+    
+    function testAccessControl() public {
         // Non-owner cannot mint
         vm.startPrank(user1);
         vm.expectRevert();
-        cbx.mint(100, 500);
+        cbx.mint(10, 5 * 10**6);
         vm.stopPrank();
         
         // Non-owner cannot set fee
@@ -104,61 +177,96 @@ contract CBXTest is Test {
         vm.stopPrank();
     }
     
-
-    
-    function testMathConsistency() public {
-        // Test multiple mints affect price correctly
-        cbx.mint(100, 400); // 100 CBX at $4.00
-        cbx.mint(200, 500); // 200 CBX at $5.00  
-        cbx.mint(300, 600); // 300 CBX at $6.00
-        
-        // Expected weighted average: (100*400 + 200*500 + 300*600) / 600
-        // = (40000 + 100000 + 180000) / 600 = 320000 / 600 = 533 (integer division)
-        uint256 totalCost = (100 * 400) + (200 * 500) + (300 * 600);
-        uint256 totalTokens = 100 + 200 + 300;
-        uint256 expectedPrice = totalCost / totalTokens;
-        
-        assertEq(cbx.pricePerToken(), expectedPrice);
-        assertEq(cbx.reserves(), 600);
-        assertEq(cbx.totalSupply(), 600);
-    }
-    
-    function testZeroInitialReserves() public {
-        // Test minting when reserves are zero
-        cbx.mint(500, 300);
-        assertEq(cbx.pricePerToken(), 300);
-        assertEq(cbx.reserves(), 500);
-    }
-    
-    function testFeeEdgeCases() public {
-        // Test 0% fee
-        cbx.setFee(0);
-        cbx.mint(100, 500);
-        assertEq(cbx.getPricePerTokenWithFee(), 500);
-        
-        // Test 10% fee
-        cbx.setFee(1000); // 10% in basis points
-        assertEq(cbx.getPricePerTokenWithFee(), 550); // 500 * 1.1 = 550
-    }
-    
-    function testReservesUpdateCorrectly() public {
-        cbx.mint(1000, 500);
-        assertEq(cbx.reserves(), 1000);
-        
-        // Add more tokens
-        cbx.mint(500, 600);
-        assertEq(cbx.reserves(), 1500);
-        assertEq(cbx.totalSupply(), 1500);
-        assertEq(cbx.balanceOf(address(cbx)), 1500);
-    }
-    
-    function testPriceCannotBeZero() public {
-        // Cannot mint at price 0
+    function testEdgeCases() public {
+        // Cannot mint at price too low
         vm.expectRevert("THIS IS WAY TOO LOW, did you remember to enter the amount in cents not dollars?");
-        cbx.mint(100, 0);
+        cbx.mint(10, 1 * 10**6); // $1 per credit
         
-        // Cannot mint at very low price
-        vm.expectRevert("THIS IS WAY TOO LOW, did you remember to enter the amount in cents not dollars?");
-        cbx.mint(100, 50);
+        // Cannot mint 0 credits
+        vm.expectRevert("MUST ENTER  A NON ZERO AMOUNT OF NEW TOKENS");
+        cbx.mint(0, 5 * 10**6);
+        
+        // Cannot buy more than reserves
+        cbx.mint(5, 5 * 10**6); // Only 500 tokens available
+        
+        vm.startPrank(user1);
+        vm.expectRevert("We don't have enough carbon credits in our pool");
+        cbx.buyTokensWithUSDC(600); // Try to buy 600 tokens
+        vm.stopPrank();
+    }
+    
+    function testComplexScenario() public {
+        // Initial mint: 100 credits at $5
+        cbx.mint(100, 5 * 10**6);
+        assertEq(cbx.reserves(), 10000);
+        
+        // User1 buys 2500 tokens (25 credits)
+        vm.startPrank(user1);
+        uint256 cost1 = 2500 * cbx.getUSDCPricePerTokenWithFee();
+        vm.mockCall(
+            USDC,
+            abi.encodeWithSelector(IERC20.transferFrom.selector, user1, address(cbx), cost1),
+            abi.encode(true)
+        );
+        cbx.buyTokensWithUSDC(2500);
+        assertEq(cbx.balanceOf(user1), 2500);
+        vm.stopPrank();
+        
+        // Mint more at different price: 50 credits at $7
+        cbx.mint(50, 7 * 10**6);
+        
+        // Check new weighted average
+        // Previous: 7500 tokens at $0.05 = $375
+        // New: 5000 tokens at $0.07 = $350
+        // Total: 12500 tokens worth $725
+        // Average: $725 / 12500 = $0.058 per token = 58000
+        assertEq(cbx.pricePerToken(), 58000);
+        
+        // User2 buys 1000 tokens (10 credits)
+        vm.startPrank(user2);
+        uint256 cost2 = 1000 * cbx.getUSDCPricePerTokenWithFee();
+        vm.mockCall(
+            USDC,
+            abi.encodeWithSelector(IERC20.transferFrom.selector, user2, address(cbx), cost2),
+            abi.encode(true)
+        );
+        cbx.buyTokensWithUSDC(1000);
+        assertEq(cbx.balanceOf(user2), 1000);
+        vm.stopPrank();
+        
+        // Final state check
+        assertEq(cbx.reserves(), 11500); // 12500 - 2500 - 1000
+        assertEq(cbx.totalSupply(), 15000); // All minted tokens
+    }
+    
+    function testEventEmission() public {
+        // Test mint events
+        vm.expectEmit(true, true, true, true);
+        emit CBX.newCreditsPurchased(10, 5 * 10**6);
+        vm.expectEmit(true, true, true, true);
+        emit CBX.priceUpdated(5.15 * 10**6);
+        vm.expectEmit(true, true, true, true);
+        emit CBX.reserveOfCBXChanged(1000);
+        
+        cbx.mint(10, 5 * 10**6);
+        
+        // Test purchase event
+        vm.startPrank(user1);
+        uint256 tokensToBuy = 100;
+        uint256 cost = tokensToBuy * cbx.getUSDCPricePerTokenWithFee();
+        
+        vm.mockCall(
+            USDC,
+            abi.encodeWithSelector(IERC20.transferFrom.selector, user1, address(cbx), cost),
+            abi.encode(true)
+        );
+        
+        vm.expectEmit(true, true, true, true);
+        emit CBX.TokensPurchasedWithUSDC(user1, tokensToBuy, cost);
+        vm.expectEmit(true, true, true, true);
+        emit CBX.reserveOfCBXChanged(900);
+        
+        cbx.buyTokensWithUSDC(tokensToBuy);
+        vm.stopPrank();
     }
 }

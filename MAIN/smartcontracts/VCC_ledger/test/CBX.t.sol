@@ -1,3 +1,5 @@
+// this one tests retirements as well:
+
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
@@ -10,6 +12,10 @@ contract CBXTest is Test {
     address public owner;
     address public user1;
     address public user2;
+    address public user3;
+    address public user4;
+    address public user5;
+    address public user6;
     
     // USDC address from your contract
     address constant USDC = 0x796Ea11Fa2dD751eD01b53C372fFDB4AAa8f00F9;
@@ -19,6 +25,10 @@ contract CBXTest is Test {
         owner = address(this);
         user1 = makeAddr("user1");
         user2 = makeAddr("user2");
+        user3 = makeAddr("user3");
+        user4 = makeAddr("user4");
+        user5 = makeAddr("user5");
+        user6 = makeAddr("user6");
         
         cbx = new CBX(INITIAL_FEE);
         
@@ -268,5 +278,320 @@ contract CBXTest is Test {
         
         cbx.buyTokensWithUSDC(tokensToBuy);
         vm.stopPrank();
+    }
+
+    // ============= RETIREMENT TESTS =============
+    
+    function _setupUsersWithTokens() internal {
+        // Mint tokens first
+        cbx.mint(100, 5 * 10**6); // 100 credits at $5
+        
+        // Give tokens to users by having them buy
+        address[6] memory users = [user1, user2, user3, user4, user5, user6];
+        uint256[6] memory amounts = [uint256(150), 75, 225, 50, 120, 80]; // Various amounts less than 100 except user3
+        
+        for (uint i = 0; i < users.length; i++) {
+            vm.startPrank(users[i]);
+            uint256 cost = amounts[i] * cbx.getUSDCPricePerTokenWithFee();
+            vm.mockCall(
+                USDC,
+                abi.encodeWithSelector(IERC20.transferFrom.selector, users[i], address(cbx), cost),
+                abi.encode(true)
+            );
+            cbx.buyTokensWithUSDC(amounts[i]);
+            vm.stopPrank();
+        }
+    }
+    
+    function testBasicRetirement() public {
+        _setupUsersWithTokens();
+        
+        // User1 retires 150 tokens
+        vm.startPrank(user1);
+        uint256 balanceBefore = cbx.balanceOf(user1);
+        uint256 totalSupplyBefore = cbx.totalSupply();
+        
+        vm.expectEmit(true, true, true, true);
+        emit CBX.TokensQueued(user1, 150);
+        
+        cbx.retire(150);
+        
+        // Check tokens were burned
+        assertEq(cbx.balanceOf(user1), balanceBefore - 150);
+        assertEq(cbx.totalSupply(), totalSupplyBefore - 150);
+        
+        // Check pending queue
+        assertEq(cbx.getPendingCount(), 1);
+        vm.stopPrank();
+    }
+    
+    function testRetirementQueueBuildup() public {
+        _setupUsersWithTokens();
+        
+        // Users retire one by one
+        address[5] memory users = [user1, user2, user3, user4, user5];
+        uint256[5] memory retireAmounts = [uint256(75), 50, 125, 30, 90];
+        
+        for (uint i = 0; i < users.length; i++) {
+            vm.startPrank(users[i]);
+            cbx.retire(retireAmounts[i]);
+            assertEq(cbx.getPendingCount(), i + 1);
+            vm.stopPrank();
+        }
+        
+        // Should have 5 pending retirements now
+        assertEq(cbx.getPendingCount(), 5);
+    }
+    
+    function testProcessRetirementsWithoutResidue() public {
+        _setupUsersWithTokens();
+        
+        // Set up retirements that sum to exactly 100
+        // user1: 25, user2: 25, user3: 25, user4: 20, user5: 5 = 100 total
+        vm.prank(user1); cbx.retire(25);
+        vm.prank(user2); cbx.retire(25);
+        vm.prank(user3); cbx.retire(25);
+        vm.prank(user4); cbx.retire(20);
+        vm.prank(user5); cbx.retire(5);
+        
+        assertEq(cbx.getPendingCount(), 5);
+        
+        // Process retirements
+        vm.expectEmit(true, false, false, false);
+        emit CBX.RetirementBundle(1, 100, ""); // bundleId=1, size=100, data doesn't matter for test
+        
+        cbx.processRetirements();
+        
+        // Queue should be empty
+        assertEq(cbx.getPendingCount(), 0);
+        assertEq(cbx.bundleCounter(), 1);
+    }
+    
+    function testProcessRetirementsWithResidue() public {
+        _setupUsersWithTokens();
+        
+        // Set up retirements that sum to 347 (residue = 47)
+        // user1: 75, user2: 50, user3: 125, user4: 47, user5: 50 = 347 total
+        vm.prank(user1); cbx.retire(75);
+        vm.prank(user2); cbx.retire(50);
+        vm.prank(user3); cbx.retire(125);
+        vm.prank(user4); cbx.retire(47);
+        vm.prank(user5); cbx.retire(50);
+        
+        assertEq(cbx.getPendingCount(), 5);
+        
+        // Process retirements - should create bundle of 300 and leave 47 in queue
+        cbx.processRetirements();
+        
+        // Should have remainder in queue
+        assertEq(cbx.getPendingCount(), 1); // The split remainder
+        assertEq(cbx.bundleCounter(), 1);
+    }
+    
+    function testProcessRetirementsWithComplexSplit() public {
+        _setupUsersWithTokens();
+        
+        // Set up retirements that will require splitting the 5th entry
+        vm.prank(user1); cbx.retire(30);
+        vm.prank(user2); cbx.retire(40);
+        vm.prank(user3); cbx.retire(50);
+        vm.prank(user4); cbx.retire(50);
+        vm.prank(user5); cbx.retire(60);
+        
+        assertEq(cbx.getPendingCount(), 5);
+        
+        // Process retirements
+        cbx.processRetirements();
+        
+        assertEq(cbx.bundleCounter(), 1);
+        assertEq(cbx.getPendingCount(), 1); // user4's remainder + user5
+    }
+    
+    function testMultipleRetirementBundles() public {
+        _setupUsersWithTokens();
+        
+        // First batch: 5 users with amounts that sum to exactly 200
+        vm.prank(user1); cbx.retire(40);
+        vm.prank(user2); cbx.retire(40);
+        vm.prank(user3); cbx.retire(40);
+        vm.prank(user4); cbx.retire(40);
+        vm.prank(user5); cbx.retire(40);
+        
+        cbx.processRetirements();
+        assertEq(cbx.bundleCounter(), 1);
+        assertEq(cbx.getPendingCount(), 0); // 200 so should be no one in queue.
+        
+        // Second batch: 5 more users
+        vm.prank(user1); cbx.retire(35);
+        vm.prank(user2); cbx.retire(35);
+        vm.prank(user3); cbx.retire(45); // this one should be split by our algorithm. to have 60 left.
+        vm.prank(user4); cbx.retire(10);
+        vm.prank(user5); cbx.retire(35);
+        
+        cbx.processRetirements();
+        assertEq(cbx.bundleCounter(), 2);
+        assertEq(cbx.getPendingCount(), 3);
+    }
+
+    
+    function testMultipleComplexRetirementBundles() public {
+        _setupUsersWithTokens();
+        
+        // First batch: 5 users with amounts that sum to exactly 200
+        vm.prank(user1); cbx.retire(40);
+        vm.prank(user2); cbx.retire(40);
+        vm.prank(user3); cbx.retire(40);
+        vm.prank(user4); cbx.retire(40);
+        vm.prank(user5); cbx.retire(40);
+        
+        cbx.processRetirements();
+        assertEq(cbx.bundleCounter(), 1);
+        assertEq(cbx.getPendingCount(), 0); // 200 so should be no one in queue.
+        
+        // Second batch: 5 more users
+        vm.prank(user1); cbx.retire(35);
+        vm.prank(user2); cbx.retire(35);
+        vm.prank(user3); cbx.retire(45); // this one should be split by our algorithm. to have 60 left.
+        vm.prank(user4); cbx.retire(10);
+        vm.prank(user5); cbx.retire(35);
+        
+        cbx.processRetirements();
+        assertEq(cbx.bundleCounter(), 2);
+        assertEq(cbx.getPendingCount(), 3); // so we should have a queue with 15, 10 and 35 as the only three entries
+
+
+        
+        vm.prank(user3); cbx.retire(139); 
+        vm.prank(user1); cbx.retire(1);// brings the total in the queue up to 200
+        cbx.processRetirements();
+        assertEq(cbx.bundleCounter(), 3);
+        assertEq(cbx.getPendingCount(), 0);
+
+    }
+    
+    function testRetirementAccessControl() public {
+        _setupUsersWithTokens();
+        
+        // Fill queue with 5 retirements
+        vm.prank(user1); cbx.retire(30);
+        vm.prank(user2); cbx.retire(30);
+        vm.prank(user3); cbx.retire(30);
+        vm.prank(user4); cbx.retire(30);
+        vm.prank(user5); cbx.retire(30);
+        
+        // Non-owner cannot process retirements
+        vm.startPrank(user1);
+        vm.expectRevert();
+        cbx.processRetirements();
+        vm.stopPrank();
+        
+        // Owner can process
+        cbx.processRetirements();
+        assertEq(cbx.bundleCounter(), 1);
+    }
+    
+    function testCannotRetireMoreThanBalance() public {
+        _setupUsersWithTokens();
+        
+        // user1 has 150 tokens, try to retire 200
+        vm.startPrank(user1);
+        vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InsufficientBalance.selector, user1, 150, 200));
+        cbx.retire(200);
+        vm.stopPrank();
+    }
+    
+    function testProcessRetirementsWithInsufficientQueue() public {
+        _setupUsersWithTokens();
+        
+        // Only 3 retirements (less than maxBundleLength=5)
+        vm.prank(user1); cbx.retire(50);
+        vm.prank(user2); cbx.retire(50);
+        vm.prank(user3); cbx.retire(50);
+        
+        // Should not process anything
+        cbx.processRetirements();
+        assertEq(cbx.bundleCounter(), 0);
+        assertEq(cbx.getPendingCount(), 3);
+    }
+    
+    function testRetirementEventData() public {
+        _setupUsersWithTokens();
+        
+        // Set up simple retirement that sums to 100
+        vm.prank(user1); cbx.retire(20);
+        vm.prank(user2); cbx.retire(20);
+        vm.prank(user3); cbx.retire(20);
+        vm.prank(user4); cbx.retire(20);
+        vm.prank(user5); cbx.retire(20);
+        
+        // Process and check that event is emitted with correct data
+        vm.recordLogs();
+        cbx.processRetirements();
+        
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        
+        // Find the RetirementBundle event
+        bool foundEvent = false;
+        for (uint i = 0; i < logs.length; i++) {
+            if (logs[i].topics[0] == keccak256("RetirementBundle(uint256,uint256,bytes)")) {
+                foundEvent = true;
+                
+                // Decode the indexed parameters
+                uint256 bundleId = abi.decode(abi.encodePacked(logs[i].topics[1]), (uint256));
+                
+                // Decode the non-indexed parameters
+                (uint256 bundleSize, bytes memory retirementData) = abi.decode(logs[i].data, (uint256, bytes));
+                
+                assertEq(bundleId, 1);
+                assertEq(bundleSize, 100); // Should be divisible by 100
+                assertTrue(bundleSize % 100 == 0); // Verify divisibility
+                assertTrue(retirementData.length > 0); // Should have data
+                break;
+            }
+        }
+        assertTrue(foundEvent, "RetirementBundle event not found");
+    }
+    
+    function testLargeRetirementScenario() public {
+        // Mint a lot more tokens for this test
+        cbx.mint(500, 5 * 10**6); // 500 credits
+        
+        // Give users various amounts
+        address[6] memory users = [user1, user2, user3, user4, user5, user6];
+        uint256[6] memory buyAmounts = [uint256(500), 300, 800, 200, 600, 400];
+        
+        for (uint i = 0; i < users.length; i++) {
+            vm.startPrank(users[i]);
+            uint256 cost = buyAmounts[i] * cbx.getUSDCPricePerTokenWithFee();
+            vm.mockCall(
+                USDC,
+                abi.encodeWithSelector(IERC20.transferFrom.selector, users[i], address(cbx), cost),
+                abi.encode(true)
+            );
+            cbx.buyTokensWithUSDC(buyAmounts[i]);
+            vm.stopPrank();
+        }
+        
+        // Multiple retirement batches with various patterns
+        // Batch 1: odd amounts that will require splitting
+        vm.prank(user1); cbx.retire(123);
+        vm.prank(user2); cbx.retire(87);
+        vm.prank(user3); cbx.retire(156);
+        vm.prank(user4); cbx.retire(94);
+        vm.prank(user5); cbx.retire(67);
+        // Total: 527, residue: 27
+        
+        cbx.processRetirements();
+        assertEq(cbx.bundleCounter(), 1);
+        assertTrue(cbx.getPendingCount() > 0); // Should have remainders
+        
+        // Batch 2: add more to complete another bundle
+        vm.prank(user6); cbx.retire(234);
+        vm.prank(user1); cbx.retire(145);
+        vm.prank(user2); cbx.retire(89);
+        vm.prank(user3); cbx.retire(178);
+        
+        cbx.processRetirements();
+        assertEq(cbx.bundleCounter(), 2);
     }
 }

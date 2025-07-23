@@ -39,7 +39,7 @@ export function Footer() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              viewport={{ once: true }}
+              viewport={{ margin: "-10% 0px -10% 0px" }}
               className="mb-6"
             >
               <p className="text-gray-700 dark:text-gray-400 leading-relaxed text-sm">
@@ -57,7 +57,7 @@ export function Footer() {
                   initial={{ opacity: 0, scale: 0 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.15, delay: index * 0.02 }}
-                  viewport={{ once: true }}
+                  viewport={{ margin: "-10% 0px -10% 0px" }}
                   whileHover={{ scale: 1.1 }}
                   className="w-10 h-10 bg-gray-200 dark:bg-[#232323] border border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center hover:bg-green-600 hover:border-green-600 transition-colors duration-200"
                   aria-label={social.label}
@@ -75,7 +75,7 @@ export function Footer() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.15, delay: categoryIndex * 0.02 }}
-              viewport={{ once: true }}
+              viewport={{ margin: "-10% 0px -10% 0px" }}
             >
               <h3 className="text-lg font-semibold mb-4 text-white">{category}</h3>
               <ul className="space-y-2">
@@ -99,11 +99,11 @@ export function Footer() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.15, delay: 0.1 }}
-          viewport={{ once: true }}
+          viewport={{ margin: "-10% 0px -10% 0px" }}
           className="border-t border-gray-200 dark:border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center"
         >
           <p className="text-gray-600 dark:text-gray-400 text-sm">
-            © 2024 CBX. All rights reserved.
+            © 2025 CBX. All rights reserved.
           </p>
           <div className="flex items-center space-x-4 mt-4 md:mt-0">
             <span className="text-gray-600 dark:text-gray-400 text-sm">Powered by</span>

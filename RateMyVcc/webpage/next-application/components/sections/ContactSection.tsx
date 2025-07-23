@@ -21,7 +21,7 @@ export function ContactSection() {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          viewport={{ once: false }}
+          viewport={{ once: true }}
           className="text-center mb-16"
         >
           <h2 className="text-5xl md:text-6xl font-bold text-white mb-6">
@@ -41,7 +41,7 @@ export function ContactSection() {
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            viewport={{ once: false }}
+            viewport={{ once: true }}
             className="space-y-8"
           >
             <div className="bg-gray-800 border border-gray-700 rounded-2xl p-8">
@@ -126,7 +126,7 @@ export function ContactSection() {
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            viewport={{ once: false }}
+            viewport={{ once: true }}
             className="bg-gray-800 border border-gray-700 rounded-2xl p-8"
           >
             <h3 className="text-2xl font-bold text-white mb-6">Our Location</h3>

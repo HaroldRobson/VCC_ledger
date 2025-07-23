@@ -46,8 +46,8 @@ export function FAQSection() {
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: false }}
+            transition={{ duration: 0.4 }}
+            viewport={{ margin: "-10% 0px -10% 0px" }}
             className="lg:col-span-5 lg:sticky lg:top-32"
           >
             <h2 className="text-6xl md:text-7xl font-bold leading-tight">
@@ -62,8 +62,8 @@ export function FAQSection() {
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: false }}
+            transition={{ duration: 0.4 }}
+            viewport={{ margin: "-10% 0px -10% 0px" }}
             className="lg:col-span-7 space-y-4"
           >
             {faqs.map((faq, index) => (
@@ -72,7 +72,7 @@ export function FAQSection() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: false }}
+                viewport={{ margin: "-10% 0px -10% 0px" }}
               >
                 <div className="bg-transparent border border-gray-300 dark:border-gray-600 rounded-2xl hover:border-gray-400 dark:hover:border-gray-500 transition-all duration-300 overflow-hidden">
                   <button

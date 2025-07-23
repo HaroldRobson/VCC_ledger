@@ -1,13 +1,61 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useInView as useFramerInView } from 'framer-motion';
 
 export default function App() {
   return <ProblemSolutionSection />;
 }
 
-// Custom hook to detect when an element is in the viewport
+// Custom hook for bidirectional animations using Framer Motion's useInView
+const useBidirectionalAnimation = () => {
+  const ref = useRef(null);
+  const isInView = useFramerInView(ref, { 
+    margin: "-10% 0px -10% 0px" 
+  });
+  return { ref, isInView };
+};
+
+// Bidirectional animation component
+const BidirectionalDiv = ({ 
+  children, 
+  delay = 0, 
+  duration = 0.4,
+  y = 30,
+  className = "",
+  ...props 
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  duration?: number;
+  y?: number;
+  className?: string;
+  [key: string]: any;
+}) => {
+  const { ref, isInView } = useBidirectionalAnimation();
+  
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y }}
+      animate={{ 
+        opacity: isInView ? 1 : 0, 
+        y: isInView ? 0 : y 
+      }}
+      transition={{ 
+        duration, 
+        delay: isInView ? delay : 0,
+        ease: "easeOut"
+      }}
+      className={className}
+      {...props}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
+// Custom hook to detect when an element is in the viewport (keeping for compatibility)
 const useInView = (options: IntersectionObserverInit): [React.RefObject<HTMLDivElement>, boolean] => {
   const ref = useRef<HTMLDivElement>(null);
   const [isInView, setIsInView] = useState(false);
@@ -104,12 +152,7 @@ export function ProblemSolutionSection() {
     <section className="py-24 bg-white dark:bg-[#171717]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0 }}
-          viewport={{ once: false }}
-        >
+        <BidirectionalDiv delay={0}>
             <div className="text-center mb-20">
             <h2 className="text-6xl md:text-7xl font-bold text-white mb-6">
                 <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
@@ -117,7 +160,7 @@ export function ProblemSolutionSection() {
                 </span>
             </h2>
             </div>
-        </motion.div>
+        </BidirectionalDiv>
 
         {/* Main Comparison Table Container */}
         <div className="max-w-7xl mx-auto">
@@ -127,21 +170,14 @@ export function ProblemSolutionSection() {
             {/* Column 1: Feature Labels (Right aligned to be closer to the center column) */}
             {/* Changed text-left to text-right and pl-4 to pr-8 for better alignment */}
             <div className="text-right pr-8">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                viewport={{ once: false }}
-                className="h-32"
-              ></motion.div> {/* Spacer to align with headers */}
+              <BidirectionalDiv delay={0.2} className="h-32">
+                <div></div>
+              </BidirectionalDiv> {/* Spacer to align with headers */}
               <div className="space-y-2">
                 {comparisons.map((comparison, index) => (
-                  <motion.div
+                  <BidirectionalDiv
                     key={comparison.feature}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.4 + (index * 0.1) }}
-                    viewport={{ once: false }}
+                    delay={0.4 + (index * 0.1)}
                   >
                     {/* Changed justify-start to justify-end */}
                     <ComparisonRow className="justify-end">
@@ -149,31 +185,26 @@ export function ProblemSolutionSection() {
                         {comparison.feature}
                       </span>
                     </ComparisonRow>
-                  </motion.div>
+                  </BidirectionalDiv>
                 ))}
               </div>
             </div>
 
             {/* Column 2: CBX (Single Card) */}
             <div className="bg-gradient-to-b from-green-600 to-emerald-800 rounded-2xl shadow-2xl shadow-green-500/20">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                viewport={{ once: false }}
-              >
+              <BidirectionalDiv delay={0.2}>
                 <div className="h-32 flex items-center justify-center">
                   <h3 className="text-white font-bold text-5xl">CBX</h3>
                 </div>
-              </motion.div>
+              </BidirectionalDiv>
               <div className="space-y-2 px-10 pb-6">
                 {comparisons.map((comparison, index) => (
                    <motion.div
                     key={comparison.cbx}
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.4 + (index * 0.1) }}
-                    viewport={{ once: false }}
+                    transition={{ duration: 0.4, delay: 0.4 + (index * 0.1) }}
+                    viewport={{ margin: "-10% 0px -10% 0px" }}
                   >
                     <ComparisonRow className="justify-start">
                       <div className="flex items-center space-x-3">
@@ -195,8 +226,8 @@ export function ProblemSolutionSection() {
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                viewport={{ once: false }}
+                transition={{ duration: 0.4, delay: 0.2 }}
+                viewport={{ margin: "-10% 0px -10% 0px" }}
               >
                 <div className="h-32 flex items-center">
                    <h4 className="text-emerald-400 text-2xl lg:text-3xl font-semibold">Traditional Brokers</h4>
@@ -208,8 +239,8 @@ export function ProblemSolutionSection() {
                     key={comparison.traditional}
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.4 + (index * 0.1) }}
-                    viewport={{ once: false }}
+                    transition={{ duration: 0.4, delay: 0.4 + (index * 0.1) }}
+                    viewport={{ margin: "-10% 0px -10% 0px" }}
                   >
                     <ComparisonRow className="justify-start">
                       <div className="flex items-center space-x-3">
@@ -232,8 +263,8 @@ export function ProblemSolutionSection() {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.0 }}
-            viewport={{ once: false }}
+            transition={{ duration: 0.4, delay: 1.0 }}
+            viewport={{ margin: "-10% 0px -10% 0px" }}
             className="text-center mt-20"
           >
             <button

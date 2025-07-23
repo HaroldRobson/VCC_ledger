@@ -40,15 +40,15 @@ export function HowItWorksSection() {
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: false }}
+            transition={{ duration: 0.4 }}
+            viewport={{ margin: "-10% 0px -10% 0px" }}
             className="lg:sticky lg:top-32"
           >
             <motion.h2
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.15, delay: 0 }}
-              viewport={{ once: false }}
+              viewport={{ margin: "-10% 0px -10% 0px" }}
               className="text-5xl md:text-6xl font-bold leading-tight mb-8"
             >
               <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
@@ -59,7 +59,7 @@ export function HowItWorksSection() {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.15, delay: 0.05 }}
-              viewport={{ once: false }}
+              viewport={{ margin: "-10% 0px -10% 0px" }}
               className="text-xl text-gray-600 dark:text-gray-400 leading-relaxed mb-8"
             >
               We revolutionize carbon credit markets through blockchain technology, 
@@ -96,8 +96,8 @@ export function HowItWorksSection() {
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: false }}
+            transition={{ duration: 0.4 }}
+            viewport={{ margin: "-10% 0px -10% 0px" }}
             className="relative"
           >
             {/* Vertical Line */}
@@ -110,10 +110,10 @@ export function HowItWorksSection() {
                   initial={{ opacity: 0, y: 50 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ 
-                    duration: 0.6, 
+                    duration: 0.4, 
                     delay: index === 0 ? 0 : index === 1 ? 0.2 : 0.4 + (index - 2) * 0.2 
                   }}
-                  viewport={{ once: false }}
+                  viewport={{ margin: "-10% 0px -10% 0px" }}
                   className="relative flex items-start space-x-6"
                 >
                   {/* Step Number Circle */}

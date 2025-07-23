@@ -2,12 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Dark mode as default to prevent FOUC, but allow light mode toggle */
+/* Light mode as default */
 :root {
-  --foreground-rgb: 255, 255, 255;
-  --background-start-rgb: 23, 23, 23;
-  --background-end-rgb: 23, 23, 23;
-  background-color: #171717;
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 255, 255, 255;
+  --background-end-rgb: 255, 255, 255;
+  background-color: #ffffff;
+}
+
+/* Light mode styles (default) */
+html {
+  background-color: #ffffff !important;
+}
+
+body {
+  background-color: #ffffff !important;
 }
 
 /* Dark mode styles */
@@ -19,19 +28,45 @@ body.dark {
   background-color: #171717 !important;
 }
 
-/* Light mode styles */
-html:not(.dark) {
-  background-color: #ffffff !important;
-}
-
-body:not(.dark) {
-  background-color: #ffffff !important;
-}
-
 .dark {
-    --foreground-rgb: 255, 255, 255;
+  --foreground-rgb: 255, 255, 255;
   --background-start-rgb: 23, 23, 23;
   --background-end-rgb: 23, 23, 23;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+/* FAQ Section Animations */
+.faq-content-enter {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+.faq-content-enter-active {
+  max-height: 200px;
+  opacity: 1;
+}
+
+.faq-content-exit {
+  max-height: 200px;
+  opacity: 1;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+.faq-content-exit-active {
+  max-height: 0;
+  opacity: 0;
 }
 
 @layer base {

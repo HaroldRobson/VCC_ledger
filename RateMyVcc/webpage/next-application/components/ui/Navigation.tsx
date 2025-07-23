@@ -7,7 +7,7 @@ import { Menu, X, Sun, Moon, ArrowRight } from 'lucide-react';
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {

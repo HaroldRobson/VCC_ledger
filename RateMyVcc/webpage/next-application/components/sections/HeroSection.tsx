@@ -71,7 +71,7 @@ export function HeroSection() {
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.15, delay: 0 }} // Start immediately
+              transition={{ duration: 0.3, delay: 0 }} // Start immediately
               className="mb-8"
             >
               <span className="inline-flex items-center px-4 py-2 bg-green-500 text-gray-900 rounded-full text-sm font-medium shadow-lg">
@@ -83,7 +83,7 @@ export function HeroSection() {
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.15, delay: 0.05 }}
+              transition={{ duration: 0.3, delay: 0.05 }}
               className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight"
             >
               The Future of Carbon Credits is{' '}
@@ -95,7 +95,7 @@ export function HeroSection() {
             <motion.p
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.15, delay: 0.1 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
               className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed"
             >
               Retire carbon credits in any amount you want. Get blockchain verification 
@@ -105,7 +105,7 @@ export function HeroSection() {
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.15, delay: 0.15 }}
+              transition={{ duration: 0.3, delay: 0.15 }}
               className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16"
             >
               <Button
@@ -129,7 +129,7 @@ export function HeroSection() {
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.15, delay: 0.2 }}
+              transition={{ duration: 0.3, delay: 0.2 }}
               className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto"
             >
               <div className="text-center">
@@ -154,7 +154,7 @@ export function HeroSection() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-            transition={{ duration: 0.15, delay: 0.25 }}
+            transition={{ duration: 0.3, delay: 0.25 }}
           className="absolute bottom-8 left-1/2 transform -translate-x-1/2 cursor-pointer z-10"
           onClick={scrollToNext}
         >

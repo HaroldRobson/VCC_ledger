@@ -1,52 +1,40 @@
-import './globals.css';
-import type { Metadata } from 'next';
+'use client';
+
 import { Inter } from 'next/font/google';
+import './globals.css';
 import { LocalSEO } from '@/components/seo/LocalSEO';
+import { useEffect } from 'react';
 
 const inter = Inter({ subsets: ['latin'] });
-
-export const metadata: Metadata = {
-  title: 'CBX - The Future of Carbon Credits',
-  description: 'Retire carbon credits in any amount with blockchain verification. Pay lower fees than brokers. Get NFT receipts for every retirement.',
-  keywords: 'carbon credits, blockchain, web3, environmental, sustainability, Etherlink L2, NFT',
-  openGraph: {
-    title: 'CBX - The Future of Carbon Credits',
-    description: 'Retire carbon credits in any amount with blockchain verification and NFT receipts.',
-    url: 'https://cbx.earth',
-    siteName: 'CBX',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'CBX - The Future of Carbon Credits',
-    description: 'Retire carbon credits in any amount with blockchain verification and NFT receipts.',
-  },
-};
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="">
       <head>
         <LocalSEO />
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              // Prevent FOUC by setting dark mode immediately
-              document.documentElement.classList.add('dark');
-              document.documentElement.style.backgroundColor = '#171717';
+              // Set light mode as default
+              document.documentElement.classList.remove('dark');
+              document.documentElement.style.backgroundColor = '#ffffff';
               // Also set body class when available
               document.addEventListener('DOMContentLoaded', function() {
-                document.body.classList.add('dark');
+                document.body.classList.remove('dark');
               });
             `,
           }}
         />
       </head>
-      <body className={`${inter.className} dark`}>
+      <body className={`${inter.className}`}>
         {children}
       </body>
     </html>

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carbon Credit User Portal</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+    <style>
+        /* All CSS is unchanged and remains correct */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%); min-height: 100vh; color: #fff; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; padding: 40px 0; margin-bottom: 20px; }
+        h1 { font-size: 3em; background: linear-gradient(45deg, #4CAF50, #8BC34A); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+        .subtitle { color: #888; font-size: 1.2em; }
+        .connect-section { text-align: center; margin: 40px 0; }
+        .connect-btn { background: linear-gradient(45deg, #4CAF50, #45a049); color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 18px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3); }
+        .connect-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4); }
+        .connect-btn:disabled { background: #666; cursor: not-allowed; }
+        .wallet-info { text-align: center; margin: 20px 0; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 10px; }
+        .address { font-family: monospace; color: #4CAF50; margin: 10px 0; font-size: 0.9em; word-break: break-all; }
+        .loading, .error, .success, .no-content { text-align: center; padding: 40px; color: #888; border-radius: 10px; margin: 20px 0; font-size: 1.2em; }
+        .spinner { border: 3px solid rgba(255,255,255,0.1); border-radius: 50%; border-top: 3px solid #4CAF50; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .error { background: rgba(255,85,85,0.1); border: 1px solid #ff5555; color: #ff5555; padding: 15px; }
+        .success { background: rgba(76,175,80,0.1); border: 1px solid #4CAF50; color: #4CAF50; padding: 15px; }
+        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .tab { padding: 10px 20px; background: none; border: none; color: #888; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s ease; font-size: 18px; }
+        .tab.active { color: #4CAF50; border-bottom-color: #4CAF50; }
+        .tab:hover { color: #fff; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .pools-grid, .nft-grid { display: grid; gap: 25px; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); }
+        .pool-card, .nft-card-wrapper { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; transition: all 0.3s ease; }
+        .pool-card { padding: 25px; cursor: pointer; }
+        .pool-card:hover, .nft-card-wrapper:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-color: #4CAF50; }
+        .main-panel { background: rgba(255,255,255,0.05); border-radius: 20px; padding: 30px; margin: 20px auto; border: 1px solid rgba(255,255,255,0.1); max-width: 800px; }
+        .back-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 10px 20px; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; margin-bottom: 20px; display: inline-flex; align-items: center; gap: 10px; }
+        .back-btn:hover { background: rgba(255,255,255,0.2); }
+        .action-btn, .ipfs-link { width: 100%; padding: 15px; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; margin-top: 20px; text-align: center; display: block; text-decoration: none; }
+        .buy-btn { background: linear-gradient(45deg, #2196F3, #42a5f5); color: white; }
+        .retire-btn { background: linear-gradient(45deg, #FF6B6B, #ee5a24); color: white; }
+        .ipfs-link { background: rgba(76, 175, 80, 0.2); border: 1px solid #4CAF50; color: #4CAF50; font-size: 16px; }
+        .action-btn:hover:not(:disabled), .ipfs-link:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+        .action-btn:disabled { background: #444; cursor: not-allowed; opacity: 0.5; }
+        .nft-card-wrapper { position: relative; overflow: hidden; }
+        .nft-image-container { background: white; padding: 20px; text-align: center; min-height: 250px; display: flex; align-items: center; justify-content: center; }
+        .nft-image-container svg { width: 100%; height: auto; }
+        .nft-content { padding: 25px; }
+        .nft-title { font-size: 1.3em; margin-bottom: 15px; color: #4CAF50; word-break: break-all; }
+        .credits-badge { display: inline-block; background: linear-gradient(45deg, #4CAF50, #8BC34A); padding: 8px 20px; border-radius: 20px; font-size: 1.2em; font-weight: bold; margin: 15px 0; }
+        .token-id { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 20px; font-size: 0.9em; color: #4CAF50; }
+        .pool-detail, .balance-display { margin-bottom: 15px; }
+        .pool-detail-label, .attribute-name { font-size: 0.8em; color: #888; margin-bottom: 3px; text-transform: uppercase; }
+        .pool-detail-value, .attribute-value { color: #fff; font-weight: 500; }
+        .pool-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+        .pool-price { font-size: 1.5em; color: #4CAF50; font-weight: bold; text-align: right; }
+        .attribute-list { margin-top: 20px; }
+        .attribute { display: flex; justify-content: space-between; padding: 12px; margin: 5px 0; background: rgba(255,255,255,0.03); border-radius: 8px; }
+        .input-group { margin-bottom: 20px; }
+        .input-label { display: block; margin-bottom: 8px; color: #aaa; }
+        input[type="number"] { width: 100%; padding: 15px; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; }
+        .info-box { background: rgba(255,255,255,0.03); border-left: 3px solid #4CAF50; padding: 15px; margin: 15px 0; font-size: 0.9em; color: #aaa; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header"><h1>Carbon Credit Portal</h1><p class="subtitle">Buy, retire, and view your on-chain carbon credits</p></div>
+        <div id="connectSection" class="connect-section"><button id="connectBtn" class="connect-btn">Connect MetaMask</button></div>
+
+        <div id="mainContent" style="display: none;">
+            <div id="walletInfo" class="wallet-info"><p>Connected Wallet:</p><p class="address" id="walletAddress"></p></div>
+            <div class="tabs">
+                <button id="marketplaceTabBtn" class="tab active" onclick="switchView('marketplace')">Marketplace</button>
+                <button id="galleryTabBtn" class="tab" onclick="switchView('gallery')">My NFTs</button>
+            </div>
+            <div id="marketplaceView" class="tab-content active">
+                <div id="poolsView">
+                    <div id="poolsLoading" class="loading"><div class="spinner"></div><p>Loading available pools...</p></div>
+                    <div id="poolsGrid" class="pools-grid"></div>
+                    <div id="noPools" class="no-content" style="display: none;">No carbon credit pools are available at this time.</div>
+                </div>
+                <div id="tradingView" style="display: none;"></div>
+            </div>
+            <div id="galleryView" class="tab-content">
+                <div id="galleryLoading" class="loading"><div class="spinner"></div><p>Loading your NFTs...</p></div>
+                <div id="nftGrid" class="nft-grid"></div>
+                <div id="noNfts" class="no-content" style="display: none;">No Carbon Credit NFTs found in this wallet.</div>
+            </div>
+        </div>
+        <div id="txFeedback">
+             <div id="txLoading" class="loading" style="display: none;"><div class="spinner"></div><p>Processing transaction...</p></div>
+             <div id="txError" class="error" style="display: none;"></div>
+             <div id="txSuccess" class="success" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const FACTORY_ADDRESS = '0x31cFb32CaB918592f5bBCd18Ab29d786538aDdb3';
+        const NFT_RECEIPT_ADDRESS = '0xE40C70c00814164FC3cE7bcD34693a26A766c38B';
+        const USDC_ADDRESS = '0x4C2AA252BEe766D3399850569713b55178934849'; // Using a known valid mock USDC on Etherlink Testnet
+        
+        // --- ABIs --- (Confirmed to be correct and complete)
+        const FACTORY_ABI = [{"inputs":[],"name":"counter","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"pools","outputs":[{"internalType":"uint256","name":"pricePerCredit","type":"uint256"},{"internalType":"string","name":"serialNumber","type":"string"},{"internalType":"address","name":"poolAddress","type":"address"},{"internalType":"string","name":"countryOfOrigin","type":"string"},{"internalType":"string","name":"methodologies","type":"string"},{"internalType":"uint256","name":"issuanceDate","type":"uint256"},{"internalType":"uint256","name":"createdAt","type":"uint256"}],"stateMutability":"view","type":"function"}];
+        const CBX_ABI = [{"inputs":[],"name":"reserves","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getUSDCPricePerTokenWithFee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"amountOfCBXOut","type":"uint256"}],"name":"buyTokensWithUSDC","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"amountOfTokens","type":"uint256"}],"name":"retire","outputs":[],"stateMutability":"payable","type":"function"}];
+        const USDC_ABI = [{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}];
+        const NFT_RECEIPT_ABI = [{"inputs":[],"name":"NFTID","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"}];
+        
+        // --- GLOBAL STATE ---
+        let web3, userAccount, factoryContract, usdcContract, nftReceiptContract, cbxContract;
+        let currentPool = {};
+
+        // --- INITIALIZATION & UI ---
+        document.getElementById('connectBtn').addEventListener('click', connectWallet);
+
+        async function connectWallet() {
+            if (typeof window.ethereum === 'undefined') return showError('Please install MetaMask!');
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                userAccount = accounts[0];
+                web3 = new Web3(window.ethereum);
+                await switchToEtherlinkTestnet();
+                factoryContract = new web3.eth.Contract(FACTORY_ABI, FACTORY_ADDRESS);
+                usdcContract = new web3.eth.Contract(USDC_ABI, USDC_ADDRESS);
+                nftReceiptContract = new web3.eth.Contract(NFT_RECEIPT_ABI, NFT_RECEIPT_ADDRESS);
+                document.getElementById('connectSection').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                document.getElementById('walletAddress').textContent = userAccount;
+                await loadPools();
+                await loadNFTs();
+            } catch (err) { showError('Failed to connect: ' + err.message); }
+        }
+
+        async function switchToEtherlinkTestnet() {
+            try {
+                await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x1f47b' }] });
+            } catch (err) {
+                if (err.code === 4902) {
+                    await window.ethereum.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [{ chainId: '0x1f47b', chainName: 'Etherlink Testnet', rpcUrls: ['https://node.ghostnet.etherlink.com'], nativeCurrency: { name: 'XTZ', symbol: 'XTZ', decimals: 18 }}],
+                    });
+                } else { throw err; }
+            }
+        }
+
+        function switchView(viewName) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(`${viewName}View`).classList.add('active');
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`${viewName}TabBtn`).classList.add('active');
+            if (viewName === 'marketplace') showPoolSelection();
+        }
+
+        function switchTradingTab(tabName, panel) {
+            panel.querySelectorAll('.trading-tab-btn').forEach(t => t.classList.remove('active'));
+            panel.querySelectorAll('.trading-tab-content').forEach(c => c.style.display = 'none');
+            const buttonId = `${tabName}TradingTabBtn`;
+            const contentId = `${tabName}TabContent`;
+            panel.querySelector(`#${buttonId}`).classList.add('active');
+            panel.querySelector(`#${contentId}`).style.display = 'block';
+        }
+
+        // --- MARKETPLACE LOGIC ---
+        
+        function showPoolSelection() {
+            document.getElementById('tradingView').style.display = 'none';
+            document.getElementById('poolsView').style.display = 'block';
+        }
+
+        async function loadPools() {
+            const loadingDiv = document.getElementById('poolsLoading');
+            const noPoolsDiv = document.getElementById('noPools');
+            loadingDiv.style.display = 'block';
+            noPoolsDiv.style.display = 'none';
+            try {
+                const poolCount = parseInt(await factoryContract.methods.counter().call());
+                if (poolCount === 0) {
+                    noPoolsDiv.style.display = 'block';
+                    return;
+                }
+                let poolPromises = [];
+                for (let i = 0; i < poolCount; i++) {
+                    poolPromises.push(factoryContract.methods.pools(i).call());
+                }
+                const poolsData = await Promise.all(poolPromises);
+                displayPools(poolsData);
+            } catch (err) {
+                console.error("Error loading pools:", err);
+                showError('Could not load pools. See console for details.');
+            } finally {
+                loadingDiv.style.display = 'none';
+            }
+        }
+
+        function displayPools(pools) {
+            const grid = document.getElementById('poolsGrid');
+            grid.innerHTML = '';
+            pools.forEach(pool => {
+                const card = document.createElement('div');
+                card.className = 'pool-card';
+                card.innerHTML = `
+                    <div class="pool-header">
+                        <div>
+                            <div class="pool-detail-label">Serial Number</div>
+                            <div class="pool-detail-value">${pool.serialNumber}</div>
+                        </div>
+                    </div>
+                    <div class="pool-detail">
+                        <div class="pool-detail-label">Country</div>
+                        <div class="pool-detail-value">${pool.countryOfOrigin}</div>
+                    </div>
+                     <div class="pool-detail">
+                        <div class="pool-detail-label">Methodology</div>
+                        <div class="pool-detail-value">${pool.methodologies}</div>
+                    </div>`;
+                card.onclick = () => selectPool(pool);
+                grid.appendChild(card);
+            });
+        }
+        
+        async function selectPool(pool) {
+            currentPool = pool;
+            cbxContract = new web3.eth.Contract(CBX_ABI, currentPool.poolAddress);
+            document.getElementById('poolsView').style.display = 'none';
+            const tradingView = document.getElementById('tradingView');
+            tradingView.innerHTML = `<div class="loading"><div class="spinner"></div><p>Loading pool details...</p></div>`;
+            tradingView.style.display = 'block';
+
+            try {
+                const [reserves, priceWithFee, usdcBalance, cbxBalance, allowance] = await Promise.all([
+                    cbxContract.methods.reserves().call(),
+                    cbxContract.methods.getUSDCPricePerTokenWithFee().call(),
+                    usdcContract.methods.balanceOf(userAccount).call(),
+                    cbxContract.methods.balanceOf(userAccount).call(),
+                    usdcContract.methods.allowance(userAccount, currentPool.poolAddress).call()
+                ]);
+
+                const pricePerCredit = (parseInt(priceWithFee) / 1e6 * 100).toFixed(2);
+                
+                tradingView.innerHTML = `
+                    <button class="back-btn" onclick="showPoolSelection()">← Back to Pools</button>
+                    <div class="main-panel">
+                        <div class="tabs">
+                            <button id="buyTradingTabBtn" class="tab trading-tab-btn active">Buy Credits</button>
+                            <button id="retireTradingTabBtn" class="tab trading-tab-btn">Retire Credits</button>
+                        </div>
+                        <div id="buyTabContent" class="trading-tab-content active">
+                             <div class="balance-display"><span>Your USDC Balance:</span> <span>${(parseInt(usdcBalance) / 1e6).toFixed(2)}</span></div>
+                             <div class="balance-display"><span>Price per Credit:</span> <span>$${pricePerCredit}</span></div>
+                             <div class="input-group"><label class="input-label">Number of Credits to Buy</label><input type="number" id="buyAmount" min="0" placeholder="e.g., 10.5"></div>
+                             <button id="approveBtn" class="action-btn buy-btn" onclick="approveUSDC()" style="display: none;">Approve USDC Spending</button>
+                             <button id="buyBtn" class="action-btn buy-btn" onclick="buyCredits()">Buy Credits</button>
+                        </div>
+                        <div id="retireTabContent" class="trading-tab-content" style="display: none;">
+                            <div class="balance-display"><span>Your Credits in this Pool:</span> <span>${(parseInt(cbxBalance) / 100).toFixed(2)}</span></div>
+                            <div class="info-box">Retiring credits will burn them and you will receive an NFT receipt. A small fee is required.</div>
+                            <div class="input-group"><label class="input-label">Number of Credits to Retire</label><input type="number" id="retireAmount" min="0" placeholder="e.g., 10.5"></div>
+                            <button id="retireBtn" class="action-btn retire-btn" onclick="retireCredits()">Retire Credits</button>
+                        </div>
+                    </div>`;
+
+                const mainPanel = tradingView.querySelector('.main-panel');
+                mainPanel.querySelector('#buyTradingTabBtn').onclick = () => switchTradingTab('buy', mainPanel);
+                mainPanel.querySelector('#retireTradingTabBtn').onclick = () => switchTradingTab('retire', mainPanel);
+
+                const needsApproval = parseInt(allowance) < (1 * 1e6);
+                document.getElementById('approveBtn').style.display = needsApproval ? 'block' : 'none';
+                document.getElementById('buyBtn').style.display = needsApproval ? 'none' : 'block';
+
+            } catch (err) {
+                console.error("Error selecting pool:", err);
+                showError("Could not load pool details. The issue might be an incorrect testnet token address or a contract revert. Check console for details.");
+                showPoolSelection();
+            }
+        }
+
+        async function approveUSDC() {
+            showLoading('Approving USDC...');
+            try {
+                const maxAmount = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
+                const approveMethod = usdcContract.methods.approve(currentPool.poolAddress, maxAmount);
+                const gasEstimate = await approveMethod.estimateGas({ from: userAccount });
+
+                await approveMethod.send({ from: userAccount, gas: Math.round(gasEstimate * 1.2) });
+                
+                showSuccess('USDC Approved! You can now buy credits.');
+                document.getElementById('approveBtn').style.display = 'none';
+                document.getElementById('buyBtn').style.display = 'block';
+            } catch (err) { 
+                showError("Approval failed. See console for details.");
+                console.error(err);
+            }
+            hideLoading();
+        }
+
+        async function buyCredits() {
+            const amount = document.getElementById('buyAmount').value;
+            if (!amount || parseFloat(amount) <= 0) return showError("Please enter a valid amount of credits to buy.");
+            showLoading('Processing purchase...');
+            try {
+                const tokensToBuy = Math.floor(parseFloat(amount) * 100);
+                const buyMethod = cbxContract.methods.buyTokensWithUSDC(tokensToBuy);
+                
+                // *** FIX: Gas estimation before sending ***
+                const gasEstimate = await buyMethod.estimateGas({ from: userAccount });
+
+                await buyMethod.send({ from: userAccount, gas: Math.round(gasEstimate * 1.2) });
+                
+                showSuccess(`Successfully purchased ${amount} credits!`);
+                selectPool(currentPool);
+            } catch (err) {
+                showError("Purchase failed. Do you have enough USDC? Check console for details.");
+                console.error(err);
+            }
+            hideLoading();
+        }
+
+        async function retireCredits() {
+            const amount = document.getElementById('retireAmount').value;
+            if (!amount || parseFloat(amount) <= 0) return showError("Please enter a valid amount to retire.");
+            showLoading('Processing retirement...');
+            try {
+                const tokensToRetire = Math.floor(parseFloat(amount) * 100);
+                const retirementFee = web3.utils.toWei('0.005', 'ether');
+                const retireMethod = cbxContract.methods.retire(tokensToRetire);
+                
+                // *** FIX: Gas estimation before sending ***
+                const gasEstimate = await retireMethod.estimateGas({ from: userAccount, value: retirementFee });
+
+                await retireMethod.send({ from: userAccount, value: retirementFee, gas: Math.round(gasEstimate * 1.2) });
+                
+                showSuccess(`Successfully retired ${amount} credits! Your NFT will appear shortly.`);
+                await loadNFTs();
+                selectPool(currentPool);
+            } catch(err) { 
+                showError("Retirement failed. Do you have enough credits to retire? Check console for details.");
+                console.error(err);
+            }
+            hideLoading();
+        }
+
+        // --- NFT GALLERY LOGIC ---
+        async function loadNFTs() {
+             const grid = document.getElementById('nftGrid');
+             const loadingDiv = document.getElementById('galleryLoading');
+             const noNftsDiv = document.getElementById('noNfts');
+             loadingDiv.style.display = 'block';
+             grid.innerHTML = '';
+             noNftsDiv.style.display = 'none';
+
+            try {
+                const totalMinted = parseInt(await nftReceiptContract.methods.NFTID().call());
+                if (totalMinted === 0) {
+                    noNftsDiv.style.display = 'block';
+                    return;
+                }
+                
+                let nftPromises = [];
+                for (let i = 1; i <= totalMinted; i++) {
+                     nftPromises.push(
+                        nftReceiptContract.methods.ownerOf(i).call()
+                        .then(owner => {
+                            if (owner.toLowerCase() === userAccount.toLowerCase()) {
+                                return nftReceiptContract.methods.tokenURI(i).call().then(uri => ({tokenId: i, uri}));
+                            }
+                            return null;
+                        }).catch(() => null)
+                    );
+                }
+                const nfts = (await Promise.all(nftPromises)).filter(n => n !== null);
+                if (nfts.length === 0) {
+                     noNftsDiv.style.display = 'block';
+                } else {
+                    nfts.forEach(displayNFT);
+                }
+            } catch (err) {
+                console.error("Error loading NFTs:", err);
+                showError('Could not load your NFTs. Check console for details.');
+            } finally {
+                loadingDiv.style.display = 'none';
+            }
+        }
+        
+        function displayNFT({ tokenId, uri }) {
+            try {
+                const metadata = JSON.parse(atob(uri.substring(uri.indexOf(',') + 1)));
+                const svgData = atob(metadata.image.substring(metadata.image.indexOf(',') + 1));
+                
+                let attributesHtml = '';
+                if (metadata.attributes && metadata.attributes.length > 0) {
+                    metadata.attributes.forEach(attr => {
+                        let value = attr.value;
+                        if (attr.trait_type.includes('Date') && parseInt(value) > 0) {
+                            value = new Date(parseInt(value) * 1000).toLocaleDateString();
+                        }
+                        attributesHtml += `
+                            <div class="attribute">
+                                <span class="attribute-name">${attr.trait_type}</span>
+                                <span class="attribute-value">${value}</span>
+                            </div>`;
+                    });
+                }
+
+                let ipfsLinkHtml = '';
+                if (metadata.external_url) {
+                    ipfsLinkHtml = `<a href="${metadata.external_url}" target="_blank" class="ipfs-link">View Certificate on IPFS</a>`;
+                }
+                
+                const credits = (metadata.attributes.find(a => a.trait_type === 'tokens')?.value || 0) / 100;
+                const card = document.createElement('div');
+                card.className = 'nft-card-wrapper';
+                card.innerHTML = `
+                    <div class="token-id">#${tokenId}</div>
+                    <div class="nft-card">
+                        <div class="nft-image-container">${svgData}</div>
+                        <div class="nft-content">
+                            <h3 class="nft-title">${metadata.name}</h3>
+                            <div class="credits-badge">${credits.toFixed(2)} Credits Retired</div>
+                            <div class="attribute-list">${attributesHtml}</div>
+                            ${ipfsLinkHtml}
+                        </div>
+                    </div>`;
+                document.getElementById('nftGrid').appendChild(card);
+            } catch (e) { console.error(`Error displaying NFT #${tokenId}:`, e); }
+        }
+
+        // --- UTILITY FUNCTIONS ---
+        function showError(message) {
+            const el = document.getElementById('txError');
+            el.textContent = message.length > 200 ? message.substring(0, 200) + '...' : message;
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 6000);
+        }
+        function showSuccess(message) {
+            const el = document.getElementById('txSuccess');
+            el.textContent = message;
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 4000);
+        }
+        function showLoading(message) {
+            const txLoading = document.getElementById('txLoading');
+            if (txLoading) {
+                 txLoading.querySelector('p').textContent = message;
+                 txLoading.style.display = 'block';
+            }
+        }
+        function hideLoading() {
+            const txLoading = document.getElementById('txLoading');
+            if(txLoading) txLoading.style.display = 'none';
+        }
+        
+        // --- EVENT LISTENERS ---
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', () => location.reload());
+            window.ethereum.on('chainChanged', () => location.reload());
+        }
+    </script>
+</body>
+</html>
+

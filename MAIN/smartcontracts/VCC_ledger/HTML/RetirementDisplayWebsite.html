@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retirement Bundle Decoder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .retirement-entry {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .field {
+            margin-bottom: 10px;
+        }
+        .field-label {
+            font-weight: bold;
+            color: #495057;
+            display: inline-block;
+            width: 150px;
+        }
+        .field-value {
+            color: #28a745;
+            font-family: monospace;
+        }
+        .summary {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .tokens-display {
+            font-size: 1.2em;
+            color: #007bff;
+        }
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Retirement Bundle Decoder</h1>
+        
+        <div>
+            <label for="dataInput">Paste your hex data here:</label>
+            <textarea id="dataInput" placeholder="0x...">0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000020000000000000000000000006ee30960c89e08aa94f628f2cd33726ab18b48f20000000000000000000000000000000000000000000000000000000068826bbf000000000000000000000000000000000000000000000000000000000000000f0000000000000000000000006ee30960c89e08aa94f628f2cd33726ab18b48f2000000000000000000000000000000000000000000000000000000006882640c000000000000000000000000000000000000000000000000000000000000004d0000000000000000000000006ee30960c89e08aa94f628f2cd33726ab18b48f2000000000000000000000000000000000000000000000000000000006882681400000000000000000000000000000000000000000000000000000000000000060000000000000000000000006ee30960c89e08aa94f628f2cd33726ab18b48f20000000000000000000000000000000000000000000000000000000068826b15</textarea>
+            <button onclick="decodeData()">Decode</button>
+        </div>
+
+        <div id="results" style="margin-top: 20px;"></div>
+    </div>
+
+    <script>
+        function decodeData() {
+            const hexData = document.getElementById('dataInput').value.trim();
+            const resultsDiv = document.getElementById('results');
+            
+            try {
+                // Remove 0x prefix if present
+                const data = hexData.startsWith('0x') ? hexData.slice(2) : hexData;
+                
+                // Each word is 32 bytes (64 hex chars)
+                const words = [];
+                for (let i = 0; i < data.length; i += 64) {
+                    words.push(data.slice(i, i + 64));
+                }
+                
+                // Parse the data structure
+                // Word 0: Offset to array data (0x20 = 32)
+                // Word 1: Array length
+                const arrayLength = parseInt(words[1], 16);
+                
+                // For each struct: tokens (uint256), user (address), timestamp (uint256)
+                const retirements = [];
+                let wordIndex = 2; // Start after offset and length
+                
+                for (let i = 0; i < arrayLength; i++) {
+                    const retirement = {
+                        tokens: BigInt('0x' + words[wordIndex]),
+                        user: '0x' + words[wordIndex + 1].slice(24), // Address is last 20 bytes
+                        timestamp: BigInt('0x' + words[wordIndex + 2])
+                    };
+                    retirements.push(retirement);
+                    wordIndex += 3;
+                }
+                
+                // Display results
+                let html = '<h2>Decoded Retirement Bundle</h2>';
+                html += `<p><strong>Number of retirements:</strong> ${arrayLength}</p>`;
+                
+                let totalTokens = BigInt(0);
+                
+                retirements.forEach((r, index) => {
+                    totalTokens += r.tokens;
+                    const date = new Date(Number(r.timestamp) * 1000);
+                    
+                    html += `
+                        <div class="retirement-entry">
+                            <h3>Retirement #${index + 1}</h3>
+                            <div class="field">
+                                <span class="field-label">User:</span>
+                                <span class="field-value">${r.user}</span>
+                            </div>
+                            <div class="field">
+                                <span class="field-label">Tokens:</span>
+                                <span class="field-value tokens-display">${r.tokens} CBX (${Number(r.tokens) / 100} credits)</span>
+                            </div>
+                            <div class="field">
+                                <span class="field-label">Timestamp:</span>
+                                <span class="field-value">${date.toLocaleString()}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                    <div class="summary">
+                        <h3>Summary</h3>
+                        <div class="field">
+                            <span class="field-label">Total Tokens:</span>
+                            <span class="field-value tokens-display">${totalTokens} CBX (${Number(totalTokens) / 100} credits)</span>
+                        </div>
+                        <div class="field">
+                            <span class="field-label">Total Retirements:</span>
+                            <span class="field-value">${arrayLength}</span>
+                        </div>
+                    </div>
+                `;
+                
+                resultsDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<div style="color: red;">Error decoding data: ${error.message}</div>`;
+            }
+        }
+        
+        // Decode on page load
+        decodeData();
+    </script>
+</body>
+</html>

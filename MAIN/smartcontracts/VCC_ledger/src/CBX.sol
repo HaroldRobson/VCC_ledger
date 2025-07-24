@@ -45,7 +45,7 @@ contract CBX is ERC20 {
     ) ERC20(serialNumber,  string(abi.encodePacked("CBX", Strings.toString(index))))  {
         owner = Owner;
         seller = Seller;
-        USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48; // CHANGE BACK TO ETHERLINK address of USDC - NOT!!!!! ETHERERUM mainnet
+        USDC = 0x4C2AA252BEe766D3399850569713b55178934849; // CHANGE BACK TO ETHERLINK address of USDC - NOT!!!!! ETHERERUM mainnet
         fee = _fee;
         USDCtokens = IERC20(USDC);
         initialMint(amountOfCredits, pricePerCredit);
@@ -185,31 +185,7 @@ contract CBX is ERC20 {
             timestamp: retirementToSplit.timestamp
         });
 
-        pendingRetirementQueue[index] = stayForNextBatch;
-        retirementBundle.push(addToBundle);
-    }
-
-    // Events
-    event TokensQueued(address indexed user, uint256 tokens);
-    event RetirementBundle(uint256 indexed bundleId, uint256 bundleSize, bytes RetirementData, address originalPool);
-
-    uint256 public bundleCounter = 0;
-
-    // User queues credits for retirement
-    function retire(uint256 amountOfTokens) external payable {
-        require(msg.value >= RETIREMET_GAS_FEE);
-        payable(owner).transfer(msg.value); // transfer some XTZ to the owner for gas when they call processRetirements();
-        _burn(msg.sender, amountOfTokens);
-
-        // Add to pending queue
-        pendingRetirementQueue.push(
-            PendingRetirement({tokens: amountOfTokens, user: msg.sender, timestamp: block.timestamp})
-        );
-
-        emit TokensQueued(msg.sender, amountOfTokens);
-    }
-
-
+        pendingRetirementQueue[index] = stayForNextBatch
 
     // Process retirements into bundles (called by owner periodically)
     function processRetirements() public onlyOwner { 

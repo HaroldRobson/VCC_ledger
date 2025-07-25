@@ -133,12 +133,12 @@ export function HeroSection() {
               className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto"
             >
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-400 mb-2">20-40%</div>
+                <div className="text-3xl font-bold text-green-400 mb-2">80-90%</div>
                 <div className="text-gray-600 dark:text-gray-400 text-sm">Lower fees than brokers</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-bold text-green-400 mb-2">100%</div>
-                <div className="text-gray-600 dark:text-gray-400 text-sm">Transparent quality</div>
+                <div className="text-gray-600 dark:text-gray-400 text-sm">Transparent</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-bold text-green-400 mb-2">NFT</div>

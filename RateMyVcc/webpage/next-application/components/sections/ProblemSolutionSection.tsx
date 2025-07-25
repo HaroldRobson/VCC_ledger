@@ -1,59 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { motion, useInView as useFramerInView } from 'framer-motion';
+import { useAnimateOnce } from '../../hooks/useOneDirectionalAnimation';
 
-export default function App() {
-  return <ProblemSolutionSection />;
-}
-
-// Custom hook for bidirectional animations using Framer Motion's useInView
-const useBidirectionalAnimation = () => {
-  const ref = useRef(null);
-  const isInView = useFramerInView(ref, { 
-    margin: "-10% 0px -10% 0px" 
-  });
-  return { ref, isInView };
-};
-
-// Bidirectional animation component
-const BidirectionalDiv = ({ 
-  children, 
-  delay = 0, 
-  duration = 0.4,
-  y = 30,
-  className = "",
-  ...props 
-}: {
-  children: React.ReactNode;
-  delay?: number;
-  duration?: number;
-  y?: number;
-  className?: string;
-  [key: string]: any;
-}) => {
-  const { ref, isInView } = useBidirectionalAnimation();
-  
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y }}
-      animate={{ 
-        opacity: isInView ? 1 : 0, 
-        y: isInView ? 0 : y 
-      }}
-      transition={{ 
-        duration, 
-        delay: isInView ? delay : 0,
-        ease: "easeOut"
-      }}
-      className={className}
-      {...props}
-    >
-      {children}
-    </motion.div>
-  );
-};
+// Remove the old bidirectional animation system entirely
+// and replace with one-directional animations
 
 // Custom hook to detect when an element is in the viewport (keeping for compatibility)
 const useInView = (options: IntersectionObserverInit): [React.RefObject<HTMLDivElement>, boolean] => {
@@ -81,27 +33,18 @@ const useInView = (options: IntersectionObserverInit): [React.RefObject<HTMLDivE
   return [ref, isInView];
 };
 
-
-// A helper component for consistent row styling and height
-interface ComparisonRowProps {
-  children: React.ReactNode;
-  className?: string;
-}
-const ComparisonRow: React.FC<ComparisonRowProps> = ({ children, className = '' }) => (
-  <div className={`h-16 flex items-center ${className}`}>{children}</div>
-);
-
-// A new component to wrap each row and apply the animation
+// Animated Row component for table comparisons
 interface AnimatedRowProps {
   children: React.ReactNode;
   index: number;
 }
+
 const AnimatedRow: React.FC<AnimatedRowProps> = ({ children, index }) => {
   const [ref, isInView] = useInView({ threshold: 0.1 });
 
   const style = {
-    transition: 'all 0.6s ease-out',
-    transitionDelay: `${index * 0.1}s`,
+    transition: 'all 0.3s ease-out',
+    transitionDelay: `${index * 0.05}s`,
     opacity: isInView ? 1 : 0,
     transform: isInView ? 'translateY(0)' : 'translateY(20px)',
   };
@@ -113,54 +56,70 @@ const AnimatedRow: React.FC<AnimatedRowProps> = ({ children, index }) => {
   );
 };
 
-
 export function ProblemSolutionSection() {
+  const titleAnimation = useAnimateOnce<HTMLDivElement>();
+  const col1Animation = useAnimateOnce<HTMLDivElement>();
+  const col2Animation = useAnimateOnce<HTMLDivElement>();
+  const col3Animation = useAnimateOnce<HTMLDivElement>();
+
   const comparisons = [
     {
-      feature: 'Transaction Fees',
-      cbx: '2-5% total fees',
-      traditional: '20-40% broker fees',
+      feature: 'Fees',
+      cbx: '0.5-2% total',
+      traditional: '20-40% of credit value',
     },
     {
-      feature: 'Retirement Proof',
-      cbx: 'NFT Receipt from Verra',
-      traditional: 'No proof provided',
+      feature: 'Minimum Amount',
+      cbx: 'Any amount (0.01 tonnes)',
+      traditional: 'Full tonnes only (1+ tonnes)',
     },
     {
-      feature: 'Quality Transparency',
-      cbx: 'AI-powered 1-100 rating system',
-      traditional: 'No quality scoring available',
+      feature: 'Transparency',
+      cbx: 'Full project ratings visible',
+      traditional: 'Limited information shared',
     },
     {
-      feature: 'Minimum Purchase',
-      cbx: '0.01 tonnes fractional retirement',
-      traditional: '1+ tonnes minimum order',
+      feature: 'Settlement',
+      cbx: 'Instant on-chain',
+      traditional: '2-6 weeks processing',
     },
     {
-      feature: 'Settlement Time',
-      cbx: 'Instant on-chain settlement',
-      traditional: '2-5 business days processing',
+      feature: 'Proof of Retirement',
+      cbx: 'Immutable NFT receipts',
+      traditional: 'PDF certificates (forgeable)',
     },
     {
-      feature: 'Verification Method',
-      cbx: 'Blockchain immutable records',
-      traditional: 'Paper certificates only',
+      feature: 'Credit Quality',
+      cbx: 'VCS Gold standard only',
+      traditional: 'Mixed quality sources',
     },
   ];
+
+  // Styled comparison row component
+  const ComparisonRow = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+    <div className={`flex items-center h-16 ${className}`}>
+      {children}
+    </div>
+  );
 
   return (
     <section className="py-24 bg-white dark:bg-[#171717]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <BidirectionalDiv delay={0}>
-            <div className="text-center mb-20">
+        <motion.div
+          ref={titleAnimation.ref}
+          initial={{ opacity: 0, y: 20 }}
+          animate={titleAnimation.isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+        >
+          <div className="text-center mb-20">
             <h2 className="text-6xl md:text-7xl font-bold text-white mb-6">
-                <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
                 Why CBX
-                </span>
+              </span>
             </h2>
-            </div>
-        </BidirectionalDiv>
+          </div>
+        </motion.div>
 
         {/* Main Comparison Table Container */}
         <div className="max-w-7xl mx-auto">
@@ -169,42 +128,50 @@ export function ProblemSolutionSection() {
             
             {/* Column 1: Feature Labels (Right aligned to be closer to the center column) */}
             {/* Changed text-left to text-right and pl-4 to pr-8 for better alignment */}
-            <div className="text-right pr-8">
-              <BidirectionalDiv delay={0.2} className="h-32">
-                <div></div>
-              </BidirectionalDiv> {/* Spacer to align with headers */}
+            <motion.div
+              ref={col1Animation.ref}
+              initial={{ opacity: 0, x: -20 }}
+              animate={col1Animation.isVisible ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
+              transition={{ duration: 0.2, delay: 0.1, ease: "easeOut" }}
+              className="text-right pr-8"
+            >
+              <div className="h-32"></div> {/* Spacer to align with headers */}
               <div className="space-y-2">
                 {comparisons.map((comparison, index) => (
-                  <BidirectionalDiv
+                  <motion.div
                     key={comparison.feature}
-                    delay={0.4 + (index * 0.1)}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={col1Animation.isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                    transition={{ duration: 0.2, delay: 0.2 + (index * 0.05), ease: "easeOut" }}
                   >
-                    {/* Changed justify-start to justify-end */}
                     <ComparisonRow className="justify-end">
                       <span className="text-gray-800 dark:text-gray-300 font-medium text-lg">
                         {comparison.feature}
                       </span>
                     </ComparisonRow>
-                  </BidirectionalDiv>
+                  </motion.div>
                 ))}
               </div>
-            </div>
+            </motion.div>
 
             {/* Column 2: CBX (Single Card) */}
-            <div className="bg-gradient-to-b from-green-600 to-emerald-800 rounded-2xl shadow-2xl shadow-green-500/20">
-              <BidirectionalDiv delay={0.2}>
-                <div className="h-32 flex items-center justify-center">
-                  <h3 className="text-white font-bold text-5xl">CBX</h3>
-                </div>
-              </BidirectionalDiv>
+            <motion.div
+              ref={col2Animation.ref}
+              initial={{ opacity: 0, y: 20 }}
+              animate={col2Animation.isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.2, delay: 0.15, ease: "easeOut" }}
+              className="bg-gradient-to-b from-green-600 to-emerald-800 rounded-2xl shadow-2xl shadow-green-500/20"
+            >
+              <div className="h-32 flex items-center justify-center">
+                <h3 className="text-white font-bold text-5xl">CBX</h3>
+              </div>
               <div className="space-y-2 px-10 pb-6">
                 {comparisons.map((comparison, index) => (
-                   <motion.div
+                  <motion.div
                     key={comparison.cbx}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 0.4 + (index * 0.1) }}
-                    viewport={{ margin: "-10% 0px -10% 0px" }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={col2Animation.isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                    transition={{ duration: 0.2, delay: 0.25 + (index * 0.05), ease: "easeOut" }}
                   >
                     <ComparisonRow className="justify-start">
                       <div className="flex items-center space-x-3">
@@ -219,35 +186,33 @@ export function ProblemSolutionSection() {
                   </motion.div>
                 ))}
               </div>
-            </div>
+            </motion.div>
 
             {/* Column 3: Traditional Brokers (Left Aligned) */}
-            <div className="text-left">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.2 }}
-                viewport={{ margin: "-10% 0px -10% 0px" }}
-              >
-                <div className="h-32 flex items-center">
-                   <h4 className="text-emerald-400 text-2xl lg:text-3xl font-semibold">Traditional Brokers</h4>
-                </div>
-              </motion.div>
+            <motion.div
+              ref={col3Animation.ref}
+              initial={{ opacity: 0, x: 20 }}
+              animate={col3Animation.isVisible ? { opacity: 1, x: 0 } : { opacity: 0, x: 20 }}
+              transition={{ duration: 0.2, delay: 0.2, ease: "easeOut" }}
+              className="text-left pl-8"
+            >
+              <div className="h-32 flex items-center justify-center">
+                <h3 className="text-gray-400 font-bold text-3xl">Traditional Brokers</h3>
+              </div>
               <div className="space-y-2">
                 {comparisons.map((comparison, index) => (
-                   <motion.div
+                  <motion.div
                     key={comparison.traditional}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 0.4 + (index * 0.1) }}
-                    viewport={{ margin: "-10% 0px -10% 0px" }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={col3Animation.isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                    transition={{ duration: 0.2, delay: 0.3 + (index * 0.05), ease: "easeOut" }}
                   >
                     <ComparisonRow className="justify-start">
                       <div className="flex items-center space-x-3">
                         <svg className="w-6 h-6 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                         </svg>
-                        <span className="text-gray-600 dark:text-gray-400 text-base">
+                        <span className="text-gray-600 dark:text-gray-400 font-medium text-base">
                           {comparison.traditional}
                         </span>
                       </div>
@@ -255,28 +220,9 @@ export function ProblemSolutionSection() {
                   </motion.div>
                 ))}
               </div>
-            </div>
-
+            </motion.div>
+            
           </div>
-
-          {/* Call to Action Button */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 1.0 }}
-            viewport={{ margin: "-10% 0px -10% 0px" }}
-            className="text-center mt-20"
-          >
-            <button
-              onClick={() => document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' })}
-              className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-10 py-4 rounded-full font-semibold text-lg transition-all duration-300 hover:scale-105 transform flex items-center justify-center mx-auto"
-            >
-              Start Saving on Fees
-              <svg className="ml-3 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </button>
-          </motion.div>
         </div>
       </div>
     </section>

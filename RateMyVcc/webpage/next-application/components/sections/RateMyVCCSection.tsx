@@ -6,12 +6,13 @@ import { Search, TrendingUp, AlertCircle, Loader2, Zap, Shield, Award } from 'lu
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Project } from '@/types/project';
+import { useAnimateOnce } from '../../hooks/useOneDirectionalAnimation';
 
 export default function App() {
   return <RateMyVCCSection />;
 }
 
-// Animated Score Circle Component
+// Animated Score Circle Component - Made much faster and smoother
 const AnimatedScoreCircle = ({ score, delay = 0 }: { score: number; delay?: number }) => {
   const [animatedScore, setAnimatedScore] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -19,9 +20,9 @@ const AnimatedScoreCircle = ({ score, delay = 0 }: { score: number; delay?: numb
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsAnimating(true);
-      // Animate score from 0 to target score
-      const duration = 2000; // 2 seconds
-      const steps = 60;
+      // Animate score from 0 to target score - much faster
+      const duration = 1000; // Reduced from 2000 to 1000ms
+      const steps = 30; // Reduced from 60 to 30 steps
       const increment = score / steps;
       let current = 0;
       
@@ -63,9 +64,9 @@ const AnimatedScoreCircle = ({ score, delay = 0 }: { score: number; delay?: numb
   return (
     <div className="relative flex-shrink-0 mx-auto md:mx-0">
       <motion.div
-        initial={{ scale: 0, rotate: -180 }}
+        initial={{ scale: 0, rotate: -90 }}
         animate={{ scale: 1, rotate: 0 }}
-        transition={{ duration: 0.6, delay: delay, type: "spring", stiffness: 200 }}
+        transition={{ duration: 0.3, delay: delay, ease: "easeOut" }}
         className="w-32 h-32 relative"
       >
         {/* Background Circle */}
@@ -91,7 +92,7 @@ const AnimatedScoreCircle = ({ score, delay = 0 }: { score: number; delay?: numb
             strokeDasharray={strokeDasharray}
             strokeDashoffset={strokeDashoffset}
             style={{
-              transition: 'stroke-dashoffset 0.1s ease-out'
+              transition: 'stroke-dashoffset 0.05s ease-out'
             }}
           />
           {/* Gradient Definition */}
@@ -109,7 +110,7 @@ const AnimatedScoreCircle = ({ score, delay = 0 }: { score: number; delay?: numb
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: delay + 0.3 }}
+              transition={{ duration: 0.2, delay: delay + 0.1 }}
               className={`text-4xl font-bold ${getScoreColor(score)}`}
             >
               {Math.round(animatedScore)}
@@ -129,6 +130,11 @@ export function RateMyVCCSection() {
   const [hasSearched, setHasSearched] = useState(false);
   const [allProjects, setAllProjects] = useState<Project[]>([]);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+
+  // Animation hooks
+  const headerAnimation = useAnimateOnce<HTMLDivElement>();
+  const subtitleAnimation = useAnimateOnce<HTMLParagraphElement>();
+  const searchAnimation = useAnimateOnce<HTMLDivElement>();
 
   // Load project data on component mount
   useEffect(() => {
@@ -221,12 +227,13 @@ export function RateMyVCCSection() {
   };
 
   return (
-    <section id="rate-credits" className="py-20 md:py-32 relative overflow-hidden font-sans bg-white dark:bg-[#171717]">
-      {/* Background Grid */}
-      <div className="absolute inset-0 opacity-[0.03]">
-        <div className="absolute inset-0" style={{
+    <section id="rate-credits" className="py-20 md:py-32 bg-white dark:bg-[#171717] relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0">
+        {/* Static grid pattern - no animation */}
+        <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.03]" style={{
           backgroundImage: `
-            linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
+            linear-gradient(0deg, rgba(0,0,0,0.1) 1px, transparent 1px),
             linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px)
           `,
           backgroundSize: '50px 50px'
@@ -236,10 +243,10 @@ export function RateMyVCCSection() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: false }}
+          ref={headerAnimation.ref}
+          initial={{ opacity: 0, y: 20 }}
+          animate={headerAnimation.isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
           className="text-center mb-12 md:mb-16"
         >
           <h2 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-4 md:mb-6">
@@ -250,10 +257,10 @@ export function RateMyVCCSection() {
           </h2>
 
           <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.15, delay: 0.1 }}
-            viewport={{ once: false }}
+            ref={subtitleAnimation.ref}
+            initial={{ opacity: 0, y: 20 }}
+            animate={subtitleAnimation.isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.2, delay: 0.1, ease: "easeOut" }}
             className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed"
           >
             Enter a carbon credit project ID to get an instant quality rating. 
@@ -264,10 +271,10 @@ export function RateMyVCCSection() {
 
         {/* Search Interface */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.15, delay: 0.15 }}
-          viewport={{ once: false }}
+          ref={searchAnimation.ref}
+          initial={{ opacity: 0, y: 20 }}
+          animate={searchAnimation.isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.2, delay: 0.15, ease: "easeOut" }}
           className="mb-12 md:mb-16"
         >
           <div className="max-w-4xl mx-auto">

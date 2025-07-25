@@ -4,11 +4,17 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, CheckCircle, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAnimateOnce } from '../../hooks/useOneDirectionalAnimation';
 
 export function WaitlistSection() {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  
+  const mainAnimation = useAnimateOnce<HTMLDivElement>();
+  const titleAnimation = useAnimateOnce<HTMLHeadingElement>();
+  const descriptionAnimation = useAnimateOnce<HTMLParagraphElement>();
+  const formAnimation = useAnimateOnce<HTMLFormElement>();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,36 +35,36 @@ export function WaitlistSection() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         {!isSubmitted ? (
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            viewport={{ margin: "-10% 0px -10% 0px" }}
+            ref={mainAnimation.ref}
+            initial={{ opacity: 0, y: 20 }}
+            animate={mainAnimation.isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
           >
             <motion.h2
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.15, delay: 0 }}
-              viewport={{ margin: "-10% 0px -10% 0px" }}
+              ref={titleAnimation.ref}
+              initial={{ opacity: 0, y: 20 }}
+              animate={titleAnimation.isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.2, delay: 0.1, ease: "easeOut" }}
               className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6"
             >
               Join the Waitlist
             </motion.h2>
             
             <motion.p
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.15, delay: 0.05 }}
-              viewport={{ margin: "-10% 0px -10% 0px" }}
+              ref={descriptionAnimation.ref}
+              initial={{ opacity: 0, y: 20 }}
+              animate={descriptionAnimation.isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.2, delay: 0.15, ease: "easeOut" }}
               className="text-xl text-gray-600 dark:text-gray-400 mb-12 max-w-2xl mx-auto"
             >
               Be among the first to experience the future of carbon credits.
             </motion.p>
 
             <motion.form
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.15, delay: 0.1 }}
-              viewport={{ margin: "-10% 0px -10% 0px" }}
+              ref={formAnimation.ref}
+              initial={{ opacity: 0, y: 20 }}
+              animate={formAnimation.isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.2, delay: 0.2, ease: "easeOut" }}
               onSubmit={handleSubmit}
               className="max-w-4xl mx-auto"
             >
@@ -99,7 +105,7 @@ export function WaitlistSection() {
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
           >
             <div className="w-16 h-16 bg-green-500/20 border border-green-500/30 rounded-full flex items-center justify-center mx-auto mb-8">
               <CheckCircle className="w-8 h-8 text-green-400" />

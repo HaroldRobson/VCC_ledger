@@ -3,9 +3,12 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
+import { useAnimateOnce } from '../../hooks/useOneDirectionalAnimation';
 
 export function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const titleAnimation = useAnimateOnce<HTMLDivElement>();
+  const faqsAnimation = useAnimateOnce<HTMLDivElement>();
 
   const faqs = [
     {
@@ -44,10 +47,10 @@ export function FAQSection() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
           {/* Left Side - Title (takes up 5 columns) */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4 }}
-            viewport={{ margin: "-10% 0px -10% 0px" }}
+            ref={titleAnimation.ref}
+            initial={{ opacity: 0, x: -20 }}
+            animate={titleAnimation.isVisible ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
             className="lg:col-span-5 lg:sticky lg:top-32"
           >
             <h2 className="text-6xl md:text-7xl font-bold leading-tight">
@@ -60,56 +63,59 @@ export function FAQSection() {
 
           {/* Right Side - FAQ Cards (takes up 7 columns) */}
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4 }}
-            viewport={{ margin: "-10% 0px -10% 0px" }}
+            ref={faqsAnimation.ref}
+            initial={{ opacity: 0, x: 20 }}
+            animate={faqsAnimation.isVisible ? { opacity: 1, x: 0 } : { opacity: 0, x: 20 }}
+            transition={{ duration: 0.2, delay: 0.1, ease: "easeOut" }}
             className="lg:col-span-7 space-y-4"
           >
-            {faqs.map((faq, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ margin: "-10% 0px -10% 0px" }}
-              >
-                <div className="bg-transparent border border-gray-300 dark:border-gray-600 rounded-2xl hover:border-gray-400 dark:hover:border-gray-500 transition-all duration-300 overflow-hidden">
-                  <button
-                    onClick={() => toggleFAQ(index)}
-                    className="w-full p-6 text-left flex items-center justify-between hover:bg-gray-100/50 dark:hover:bg-gray-800/30 transition-colors duration-200"
-                  >
-                    <span className="text-lg font-medium text-gray-800 dark:text-gray-300 pr-4 leading-relaxed">
-                      {faq.question}
-                    </span>
-                    <motion.div
-                      animate={{ rotate: openIndex === index ? 180 : 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="flex-shrink-0 w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center"
+            {faqs.map((faq, index) => {
+              const faqAnimation = useAnimateOnce<HTMLDivElement>();
+              return (
+                <motion.div
+                  key={index}
+                  ref={faqAnimation.ref}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={faqAnimation.isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                  transition={{ duration: 0.2, delay: 0.2 + (index * 0.05), ease: "easeOut" }}
+                >
+                  <div className="bg-transparent border border-gray-300 dark:border-gray-600 rounded-2xl hover:border-gray-400 dark:hover:border-gray-500 transition-all duration-300 overflow-hidden">
+                    <button
+                      onClick={() => toggleFAQ(index)}
+                      className="w-full p-6 text-left flex items-center justify-between hover:bg-gray-100/50 dark:hover:bg-gray-800/30 transition-colors duration-200"
                     >
-                      <ChevronDown className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                    </motion.div>
-                  </button>
-                  
-                  <AnimatePresence>
-                    {openIndex === index && (
+                      <span className="text-lg font-medium text-gray-800 dark:text-gray-300 pr-4 leading-relaxed">
+                        {faq.question}
+                      </span>
                       <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
+                        animate={{ rotate: openIndex === index ? 180 : 0 }}
                         transition={{ duration: 0.3 }}
+                        className="flex-shrink-0 w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center"
                       >
-                        <div className="px-6 pb-6 border-t border-gray-300 dark:border-gray-700">
-                          <p className="text-gray-600 dark:text-gray-400 leading-relaxed pt-4">
-                            {faq.answer}
-                          </p>
-                        </div>
+                        <ChevronDown className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                       </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </motion.div>
-            ))}
+                    </button>
+                    
+                    <AnimatePresence>
+                      {openIndex === index && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <div className="px-6 pb-6 border-t border-gray-300 dark:border-gray-700">
+                            <p className="text-gray-600 dark:text-gray-400 leading-relaxed pt-4">
+                              {faq.answer}
+                            </p>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </motion.div>
+              );
+            })}
           </motion.div>
         </div>
       </div>

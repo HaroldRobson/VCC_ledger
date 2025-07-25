@@ -24,15 +24,10 @@ export function HeroSection() {
           
           {/* 2. No gradient overlay needed - using section bg color */}
 
-          {/* 3. ANIMATED graphics (Top background layer, above gradient) */}
-          <motion.div 
-            className="absolute inset-0 z-[2] overflow-hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.2, delay: 0.1 }}
-          >
+          {/* 3. Static background graphics - no animation to prevent jarring effects */}
+          <div className="absolute inset-0 z-[2] overflow-hidden">
             <svg className="absolute w-full h-full" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
-              {/* Path 1: Left - MOVED SLIGHTLY HIGHER */}
+              {/* Path 1: Left - Static, no animation */}
               <path
                 d="M79 285C-31 137 351 202 438 370"
                 fill="none"
@@ -47,9 +42,9 @@ export function HeroSection() {
                 <path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3C7.14 19.87 7.64 20 8 20c11 0 14-17 14-17-1 2-8 2.25-13 3.25S2 11.5 2 13.5c0 2 1.75 3.75 1.75 3.75C7 8 17 8 17 8z" fill="currentColor" className="text-green-500" transform="translate(-12, -12)" />
               </g>
 
-              {/* Path 2: Right - REDRAWN to curve up from bottom right */}
+              {/* Path 2: Right - Static, no animation */}
               <path
-    d="M1530 592C1627 740 1222 758 1118 589"
+                d="M1530 592C1627 740 1222 758 1118 589"
                 fill="none"
                 stroke="currentColor"
                 className="text-green-500"
@@ -62,16 +57,16 @@ export function HeroSection() {
                  <path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3C7.14 19.87 7.64 20 8 20c11 0 14-17 14-17-1 2-8 2.25-13 3.25S2 11.5 2 13.5c0 2 1.75 3.75 1.75 3.75C7 8 17 8 17 8z" fill="currentColor" className="text-green-500" transform="translate(-12, -12)" />
               </g>
             </svg>
-          </motion.div>
+          </div>
         </div>
 
         {/* Content - Sits on top of all background elements */}
         <div className="relative z-10 min-h-screen flex items-center justify-center px-4 pt-16">
           <div className="max-w-4xl mx-auto text-center">
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0 }} // Start immediately
+              transition={{ duration: 0.2, delay: 0, ease: "easeOut" }}
               className="mb-8"
             >
               <span className="inline-flex items-center px-4 py-2 bg-green-500 text-gray-900 rounded-full text-sm font-medium shadow-lg">
@@ -81,9 +76,9 @@ export function HeroSection() {
             </motion.div>
 
             <motion.h1
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.05 }}
+              transition={{ duration: 0.2, delay: 0.05, ease: "easeOut" }}
               className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight"
             >
               The Future of Carbon Credits is{' '}
@@ -93,9 +88,9 @@ export function HeroSection() {
             </motion.h1>
 
             <motion.p
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
+              transition={{ duration: 0.2, delay: 0.1, ease: "easeOut" }}
               className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed"
             >
               Retire carbon credits in any amount you want. Get blockchain verification 
@@ -103,9 +98,9 @@ export function HeroSection() {
             </motion.p>
 
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.15 }}
+              transition={{ duration: 0.2, delay: 0.15, ease: "easeOut" }}
               className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16"
             >
               <Button
@@ -127,9 +122,9 @@ export function HeroSection() {
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.2 }}
+              transition={{ duration: 0.2, delay: 0.2, ease: "easeOut" }}
               className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto"
             >
               <div className="text-center">
@@ -154,7 +149,7 @@ export function HeroSection() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-            transition={{ duration: 0.3, delay: 0.25 }}
+          transition={{ duration: 0.2, delay: 0.25, ease: "easeOut" }}
           className="absolute bottom-8 left-1/2 transform -translate-x-1/2 cursor-pointer z-10"
           onClick={scrollToNext}
         >

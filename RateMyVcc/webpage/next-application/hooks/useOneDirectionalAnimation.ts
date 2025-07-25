@@ -15,12 +15,24 @@ interface AnimationState {
 
 let lastScrollY = 0;
 let scrollDirection: 'up' | 'down' = 'down';
+let hasReachedBottom = false;
 
 // Track scroll direction globally to avoid multiple listeners
 if (typeof window !== 'undefined') {
   const updateScrollDirection = () => {
     const currentScrollY = window.scrollY;
     scrollDirection = currentScrollY > lastScrollY ? 'down' : 'up';
+    
+    // Check if user has reached the bottom of the page
+    const windowHeight = window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight;
+    const scrollPosition = currentScrollY + windowHeight;
+    
+    // Consider "bottom" as being within 100px of actual bottom
+    if (scrollPosition >= documentHeight - 100) {
+      hasReachedBottom = true;
+    }
+    
     lastScrollY = currentScrollY;
   };
 
@@ -51,6 +63,11 @@ export function useOneDirectionalAnimation<T extends HTMLElement = HTMLElement>(
     setState(prevState => {
       // If already animated, don't change anything
       if (prevState.hasAnimated) {
+        return prevState;
+      }
+
+      // Prevent animations when scrolling up after reaching bottom
+      if (hasReachedBottom && scrollDirection === 'up') {
         return prevState;
       }
 

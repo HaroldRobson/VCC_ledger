@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carbon Credit NFT Gallery</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 3em;
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #888;
+            font-size: 1.2em;
+        }
+        
+        .connect-section {
+            text-align: center;
+            margin: 40px 0;
+        }
+        
+        .connect-btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+        
+        .connect-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+        
+        .connect-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        
+        .wallet-info {
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+        
+        .address {
+            font-family: monospace;
+            color: #4CAF50;
+            margin: 10px 0;
+        }
+        
+        .nft-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .nft-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .nft-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border-color: #4CAF50;
+        }
+        
+        .nft-image-container {
+            background: white;
+            padding: 30px;
+            text-align: center;
+            min-height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .nft-content {
+            padding: 25px;
+        }
+        
+        .nft-title {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: #4CAF50;
+            word-break: break-all;
+        }
+        
+        .credits-badge {
+            display: inline-block;
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        
+        .attribute-list {
+            margin-top: 20px;
+        }
+        
+        .attribute {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            margin: 8px 0;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .attribute-name {
+            color: #888;
+            font-size: 0.9em;
+        }
+        
+        .attribute-value {
+            color: #fff;
+            font-weight: 500;
+        }
+        
+        .ipfs-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            padding: 12px;
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4CAF50;
+            border-radius: 10px;
+            color: #4CAF50;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .ipfs-link:hover {
+            background: rgba(76, 175, 80, 0.3);
+            transform: translateY(-1px);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 20px;
+            color: #ff5555;
+            background: rgba(255,85,85,0.1);
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .no-nfts {
+            text-align: center;
+            padding: 60px;
+            color: #888;
+            font-size: 1.2em;
+        }
+        
+        .token-id {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            color: #4CAF50;
+        }
+        
+        .nft-card-wrapper {
+            position: relative;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            border-top: 3px solid #4CAF50;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Carbon Credit NFT Gallery</h1>
+            <p class="subtitle">View your carbon retirement receipts</p>
+        </div>
+
+        <div class="connect-section">
+            <button id="connectBtn" class="connect-btn" onclick="connectWallet()">
+                Connect MetaMask
+            </button>
+        </div>
+
+        <div id="walletInfo" class="wallet-info" style="display: none;">
+            <p>Connected Wallet:</p>
+            <p class="address" id="walletAddress"></p>
+            <p id="nftCount"></p>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Loading your NFTs...</p>
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <div id="nftGrid" class="nft-grid"></div>
+
+        <div id="noNfts" class="no-nfts" style="display: none;">
+            No Carbon Credit NFTs found in this wallet
+        </div>
+    </div>
+
+    <script>
+        // Contract details - UPDATE THESE
+        const CONTRACT_ADDRESS = '0xE40C70c00814164FC3cE7bcD34693a26A766c38B'; // Your NFTReceipt contract address
+        const CONTRACT_ABI = [
+            {
+                "inputs": [{"internalType": "uint256", "name": "tokenId", "type": "uint256"}],
+                "name": "tokenURI",
+                "outputs": [{"internalType": "string", "name": "", "type": "string"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "address", "name": "owner", "type": "address"}],
+                "name": "balanceOf",
+                "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        let web3;
+        let contract;
+        let userAccount;
+
+        async function connectWallet() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    // Request account access
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    userAccount = accounts[0];
+                    
+                    // Initialize Web3
+                    web3 = new Web3(window.ethereum);
+                    
+                    // Switch to Etherlink testnet
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0x1f47b' }], // 128123 in hex
+                        });
+                    } catch (switchError) {
+                        // This error code indicates that the chain has not been added to MetaMask.
+                        if (switchError.code === 4902) {
+                            await window.ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: '0x1f47b',
+                                    chainName: 'Etherlink Testnet',
+                                    rpcUrls: ['https://node.ghostnet.etherlink.com'],
+                                    nativeCurrency: {
+                                        name: 'XTZ',
+                                        symbol: 'XTZ',
+                                        decimals: 18
+                                    }
+                                }],
+                            });
+                        }
+                    }
+                    
+                    // Initialize contract
+                    contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
+                    
+                    // Update UI
+                    document.getElementById('connectBtn').textContent = 'Connected';
+                    document.getElementById('connectBtn').disabled = true;
+                    document.getElementById('walletInfo').style.display = 'block';
+                    document.getElementById('walletAddress').textContent = userAccount;
+                    
+                    // Load NFTs
+                    await loadNFTs();
+                    
+                } catch (error) {
+                    showError('Failed to connect wallet: ' + error.message);
+                }
+            } else {
+                showError('Please install MetaMask!');
+            }
+        }
+
+        async function loadNFTs() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('nftGrid').innerHTML = '';
+            document.getElementById('noNfts').style.display = 'none';
+            
+            try {
+                // Get balance
+                const balance = await contract.methods.balanceOf(userAccount).call();
+                const nftCount = parseInt(balance);
+                
+                document.getElementById('nftCount').textContent = `${nftCount} NFT${nftCount !== 1 ? 's' : ''} found`;
+                
+                if (nftCount === 0) {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('noNfts').style.display = 'block';
+                    return;
+                }
+                
+                // Since we know NFT IDs start at 1 and increment, we can try sequential IDs
+                // This is a workaround since tokenOfOwnerByIndex might not be available
+                const nfts = [];
+                let foundCount = 0;
+                let tokenId = 1;
+                let consecutiveFails = 0;
+                
+                // Try to find NFTs by checking sequential token IDs
+                while (foundCount < nftCount && consecutiveFails < 10) {
+                    try {
+                        const uri = await contract.methods.tokenURI(tokenId).call();
+                        // If we get here, the token exists
+                        nfts.push({ tokenId, uri });
+                        foundCount++;
+                        consecutiveFails = 0;
+                    } catch (error) {
+                        // Token doesn't exist or not owned by user
+                        consecutiveFails++;
+                    }
+                    tokenId++;
+                    
+                    // Safety limit to prevent infinite loop
+                    if (tokenId > 1000) break;
+                }
+                
+                // Display NFTs
+                nfts.forEach(nft => displayNFT(nft));
+                
+                document.getElementById('loading').style.display = 'none';
+                
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                showError('Failed to load NFTs: ' + error.message);
+            }
+        }
+
+        function displayNFT({ tokenId, uri }) {
+            try {
+                // Decode the metadata
+                const base64Data = uri.replace('data:application/json;base64,', '');
+                const jsonString = atob(base64Data);
+                const metadata = JSON.parse(jsonString);
+                
+                // Extract tokens and calculate credits
+                const tokensAttr = metadata.attributes.find(a => a.trait_type === 'tokens');
+                const tokens = tokensAttr ? parseInt(tokensAttr.value) : 0;
+                const credits = tokens / 100;
+                
+                // Format dates
+                const purchaseAttr = metadata.attributes.find(a => a.trait_type === 'Purchase Date');
+                const receivalAttr = metadata.attributes.find(a => a.trait_type === 'Receival Date');
+                
+                const purchaseDate = purchaseAttr ? new Date(parseInt(purchaseAttr.value) * 1000).toLocaleDateString() : 'N/A';
+                const receivalDate = receivalAttr ? new Date(parseInt(receivalAttr.value) * 1000).toLocaleDateString() : 'N/A';
+                
+                // Decode SVG
+                const svgBase64 = metadata.image.replace('data:image/svg+xml;base64,', '');
+                const svgData = atob(svgBase64);
+                
+                // Create card HTML
+                const cardHtml = `
+                    <div class="nft-card-wrapper">
+                        <div class="token-id">#${tokenId}</div>
+                        <div class="nft-card">
+                            <div class="nft-image-container">
+                                ${svgData}
+                            </div>
+                            <div class="nft-content">
+                                <h3 class="nft-title">${metadata.name}</h3>
+                                <div class="credits-badge">${credits} Carbon Credits</div>
+                                
+                                <div class="attribute-list">
+                                    <div class="attribute">
+                                        <span class="attribute-name">Tokens</span>
+                                        <span class="attribute-value">${tokens} CBX</span>
+                                    </div>
+                                    <div class="attribute">
+                                        <span class="attribute-name">Purchase Date</span>
+                                        <span class="attribute-value">${purchaseDate}</span>
+                                    </div>
+                                    <div class="attribute">
+                                        <span class="attribute-name">Receival Date</span>
+                                        <span class="attribute-value">${receivalDate}</span>
+                                    </div>
+                                </div>
+                                
+                                ${metadata.external_url ? 
+                                    `<a href="${metadata.external_url}" target="_blank" class="ipfs-link">
+                                        View Certificate on IPFS →
+                                    </a>` : ''
+                                }
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('nftGrid').innerHTML += cardHtml;
+                
+            } catch (error) {
+                console.error('Error displaying NFT:', error);
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Listen for account changes
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length === 0) {
+                    // User disconnected
+                    location.reload();
+                } else if (accounts[0] !== userAccount) {
+                    // User switched accounts
+                    location.reload();
+                }
+            });
+        }
+    </script>
+</body>
+</html>

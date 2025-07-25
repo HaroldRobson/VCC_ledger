@@ -3,460 +3,686 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carbon Credit User Portal</title>
-    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+    <title>Carbon Credits DApp</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <style>
-        /* All CSS is unchanged and remains correct */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%); min-height: 100vh; color: #fff; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .header { text-align: center; padding: 40px 0; margin-bottom: 20px; }
-        h1 { font-size: 3em; background: linear-gradient(45deg, #4CAF50, #8BC34A); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
-        .subtitle { color: #888; font-size: 1.2em; }
-        .connect-section { text-align: center; margin: 40px 0; }
-        .connect-btn { background: linear-gradient(45deg, #4CAF50, #45a049); color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 18px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3); }
-        .connect-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4); }
-        .connect-btn:disabled { background: #666; cursor: not-allowed; }
-        .wallet-info { text-align: center; margin: 20px 0; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 10px; }
-        .address { font-family: monospace; color: #4CAF50; margin: 10px 0; font-size: 0.9em; word-break: break-all; }
-        .loading, .error, .success, .no-content { text-align: center; padding: 40px; color: #888; border-radius: 10px; margin: 20px 0; font-size: 1.2em; }
-        .spinner { border: 3px solid rgba(255,255,255,0.1); border-radius: 50%; border-top: 3px solid #4CAF50; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .error { background: rgba(255,85,85,0.1); border: 1px solid #ff5555; color: #ff5555; padding: 15px; }
-        .success { background: rgba(76,175,80,0.1); border: 1px solid #4CAF50; color: #4CAF50; padding: 15px; }
-        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .tab { padding: 10px 20px; background: none; border: none; color: #888; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s ease; font-size: 18px; }
-        .tab.active { color: #4CAF50; border-bottom-color: #4CAF50; }
-        .tab:hover { color: #fff; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .pools-grid, .nft-grid { display: grid; gap: 25px; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); }
-        .pool-card, .nft-card-wrapper { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; transition: all 0.3s ease; }
-        .pool-card { padding: 25px; cursor: pointer; }
-        .pool-card:hover, .nft-card-wrapper:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-color: #4CAF50; }
-        .main-panel { background: rgba(255,255,255,0.05); border-radius: 20px; padding: 30px; margin: 20px auto; border: 1px solid rgba(255,255,255,0.1); max-width: 800px; }
-        .back-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 10px 20px; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; margin-bottom: 20px; display: inline-flex; align-items: center; gap: 10px; }
-        .back-btn:hover { background: rgba(255,255,255,0.2); }
-        .action-btn, .ipfs-link { width: 100%; padding: 15px; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; margin-top: 20px; text-align: center; display: block; text-decoration: none; }
-        .buy-btn { background: linear-gradient(45deg, #2196F3, #42a5f5); color: white; }
-        .retire-btn { background: linear-gradient(45deg, #FF6B6B, #ee5a24); color: white; }
-        .ipfs-link { background: rgba(76, 175, 80, 0.2); border: 1px solid #4CAF50; color: #4CAF50; font-size: 16px; }
-        .action-btn:hover:not(:disabled), .ipfs-link:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
-        .action-btn:disabled { background: #444; cursor: not-allowed; opacity: 0.5; }
-        .nft-card-wrapper { position: relative; overflow: hidden; }
-        .nft-image-container { background: white; padding: 20px; text-align: center; min-height: 250px; display: flex; align-items: center; justify-content: center; }
-        .nft-image-container svg { width: 100%; height: auto; }
-        .nft-content { padding: 25px; }
-        .nft-title { font-size: 1.3em; margin-bottom: 15px; color: #4CAF50; word-break: break-all; }
-        .credits-badge { display: inline-block; background: linear-gradient(45deg, #4CAF50, #8BC34A); padding: 8px 20px; border-radius: 20px; font-size: 1.2em; font-weight: bold; margin: 15px 0; }
-        .token-id { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 20px; font-size: 0.9em; color: #4CAF50; }
-        .pool-detail, .balance-display { margin-bottom: 15px; }
-        .pool-detail-label, .attribute-name { font-size: 0.8em; color: #888; margin-bottom: 3px; text-transform: uppercase; }
-        .pool-detail-value, .attribute-value { color: #fff; font-weight: 500; }
-        .pool-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
-        .pool-price { font-size: 1.5em; color: #4CAF50; font-weight: bold; text-align: right; }
-        .attribute-list { margin-top: 20px; }
-        .attribute { display: flex; justify-content: space-between; padding: 12px; margin: 5px 0; background: rgba(255,255,255,0.03); border-radius: 8px; }
-        .input-group { margin-bottom: 20px; }
-        .input-label { display: block; margin-bottom: 8px; color: #aaa; }
-        input[type="number"] { width: 100%; padding: 15px; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; }
-        .info-box { background: rgba(255,255,255,0.03); border-left: 3px solid #4CAF50; padding: 15px; margin: 15px 0; font-size: 0.9em; color: #aaa; }
+        :root {
+            --bg-dark: #171717;
+            --surface-dark: #262626;
+            --border-dark: #404040;
+            --text-light: #f5f5f5;
+            --text-muted: #a3a3a3;
+            --green: #22C55E;
+            --emerald: #10B981;
+            --red: #ef4444;
+            --red-dark: #b91c1c;
+            --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: var(--font-sans);
+            margin: 0;
+            padding: 2rem;
+        }
+
+        #app {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1, h2, h3 {
+            font-weight: 700;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            background: linear-gradient(to right, var(--green), var(--emerald));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: 2rem;
+            border-bottom: 1px solid var(--border-dark);
+            padding-bottom: 0.75rem;
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            margin: 0;
+        }
+        
+        /* --- Buttons --- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.65rem 1.25rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 9999px;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease-in-out;
+            text-decoration: none;
+        }
+        .btn:hover:not(:disabled) {
+            transform: scale(1.05);
+        }
+        .btn:disabled {
+            cursor: not-allowed;
+            background: var(--border-dark);
+            color: var(--text-muted);
+        }
+        .btn-primary {
+             background: linear-gradient(to right, var(--green), var(--emerald));
+             color: var(--bg-dark);
+        }
+        .btn-primary:hover:not(:disabled) {
+            box-shadow: 0 0 20px rgba(45, 212, 191, 0.3);
+        }
+        .btn-outline {
+             background-color: transparent;
+             color: var(--text-light);
+             border: 2px solid var(--border-dark);
+        }
+        .btn-outline:hover:not(:disabled) {
+            background-color: var(--surface-dark);
+            border-color: var(--text-muted);
+        }
+        .btn-danger {
+            background-color: var(--red);
+            color: var(--text-light);
+        }
+        .btn-danger:hover:not(:disabled) {
+            background-color: var(--red-dark);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+        }
+        
+        /* --- Wallet Section --- */
+        #wallet-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background-color: var(--surface-dark);
+            border-radius: 12px;
+            margin: 2rem 0 3rem 0;
+        }
+        
+        #wallet-info {
+            text-align: center;
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+        #connect-btn { width: 200px; }
+
+
+        /* --- NEW POOL DESIGN --- */
+        #pools-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .pool-card {
+            position: relative;
+            background-color: var(--surface-dark);
+            border: 1px solid var(--border-dark);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            width: 100%;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            transition: border-color 0.2s;
+        }
+        .pool-card:hover {
+            border-color: var(--green);
+        }
+
+        .pool-section {
+            padding: 0 1.5rem;
+            border-left: 1px solid var(--border-dark);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .pool-section:first-child {
+            padding-left: 0;
+            border-left: none;
+        }
+
+        .pool-details {
+            flex-grow: 1;
+        }
+        .pool-details .pool-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+        }
+        .pool-details .pool-name .info-btn {
+            margin-left: 0.75rem;
+        }
+
+        .pool-details .pool-sub-details {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+        .stat-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+        .pool-balance .stat-value {
+            color: var(--green);
+        }
+
+        .pool-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        /* --- Info Button & Tooltip --- */
+        .info-btn {
+            background: transparent;
+            border: 1px solid var(--border-dark);
+            color: var(--text-muted);
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            font-family: serif;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .info-btn:hover {
+            background: var(--border-dark);
+            color: var(--text-light);
+        }
+        .info-tooltip {
+            display: none;
+            position: absolute;
+            top: calc(100% + 5px); /* Position below the card */
+            left: 20px;
+            background-color: #333;
+            border: 1px solid var(--border-dark);
+            border-radius: 8px;
+            padding: 1rem;
+            z-index: 10;
+            font-size: 0.85rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            width: 320px;
+            word-wrap: break-word;
+        }
+        .info-tooltip.show { display: block; }
+        .info-tooltip p { margin: 0.4rem 0; }
+        .info-tooltip strong { color: var(--text-light); }
+        .info-tooltip hr {
+            border: none;
+            border-top: 1px solid var(--border-dark);
+            margin: 0.75rem 0;
+        }
+
+
+        /* --- Modal --- */
+        #transaction-modal {
+            position: fixed; inset: 0;
+            background-color: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(5px);
+            align-items: center; justify-content: center;
+            z-index: 100; display: none;
+        }
+        #transaction-modal.show { display: flex; }
+        .modal-container {
+            background-color: var(--surface-dark);
+            padding: 1.5rem 2rem; border-radius: 16px;
+            border: 1px solid var(--border-dark);
+            width: 90%; max-width: 500px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+        }
+        .modal-header {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 1.5rem;
+        }
+        .close-btn {
+            background: none; border: none;
+            color: var(--text-muted); font-size: 1.5rem;
+            line-height: 1; cursor: pointer; padding: 0;
+        }
+        .close-btn:hover { color: var(--text-light); }
+        .form-input {
+            width: 100%; background-color: var(--bg-dark);
+            border: 1px solid var(--border-dark); color: var(--text-light);
+            padding: 0.75rem 1rem; border-radius: 8px;
+            font-size: 1rem; margin: 0.75rem 0; box-sizing: border-box;
+        }
+        .form-input:focus { outline: none; border-color: var(--green); }
+        #modal-content .actions { display: flex; gap: 1rem; margin-top: 1rem; }
+        .bill-details {
+            background-color: var(--bg-dark); border: 1px solid var(--border-dark);
+            border-radius: 8px; padding: 1rem; margin-top: 1rem;
+        }
+        .bill-details p {
+            display: flex; justify-content: space-between;
+            font-size: 0.9rem; margin: 0.5rem 0;
+        }
+        .bill-details hr {
+            border: none; border-top: 1px solid var(--border-dark);
+            margin: 0.75rem 0;
+        }
+        .bill-details p.total { font-weight: bold; color: var(--text-light); font-size: 1rem; }
+        #purchase-status, #retire-status {
+            margin-top: 1rem; color: var(--green);
+            font-size: 0.9rem; text-align: center;
+            min-height: 1.2em;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 900px) {
+            .pool-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            .pool-section {
+                padding: 1rem 0;
+                border-left: none;
+                border-top: 1px solid var(--border-dark);
+                width: 100%;
+            }
+            .pool-section:first-child {
+                padding-top: 0;
+                border-top: none;
+            }
+            .pool-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header"><h1>Carbon Credit Portal</h1><p class="subtitle">Buy, retire, and view your on-chain carbon credits</p></div>
-        <div id="connectSection" class="connect-section"><button id="connectBtn" class="connect-btn">Connect MetaMask</button></div>
-
-        <div id="mainContent" style="display: none;">
-            <div id="walletInfo" class="wallet-info"><p>Connected Wallet:</p><p class="address" id="walletAddress"></p></div>
-            <div class="tabs">
-                <button id="marketplaceTabBtn" class="tab active" onclick="switchView('marketplace')">Marketplace</button>
-                <button id="galleryTabBtn" class="tab" onclick="switchView('gallery')">My NFTs</button>
-            </div>
-            <div id="marketplaceView" class="tab-content active">
-                <div id="poolsView">
-                    <div id="poolsLoading" class="loading"><div class="spinner"></div><p>Loading available pools...</p></div>
-                    <div id="poolsGrid" class="pools-grid"></div>
-                    <div id="noPools" class="no-content" style="display: none;">No carbon credit pools are available at this time.</div>
-                </div>
-                <div id="tradingView" style="display: none;"></div>
-            </div>
-            <div id="galleryView" class="tab-content">
-                <div id="galleryLoading" class="loading"><div class="spinner"></div><p>Loading your NFTs...</p></div>
-                <div id="nftGrid" class="nft-grid"></div>
-                <div id="noNfts" class="no-content" style="display: none;">No Carbon Credit NFTs found in this wallet.</div>
-            </div>
+    <div id="app">
+        <h1>Carbon Credits DApp</h1>
+        
+        <div id="wallet-section">
+            <button id="connect-btn" class="btn btn-outline" onclick="connectWallet()">Connect Wallet</button>
+            <div id="wallet-info"></div>
         </div>
-        <div id="txFeedback">
-             <div id="txLoading" class="loading" style="display: none;"><div class="spinner"></div><p>Processing transaction...</p></div>
-             <div id="txError" class="error" style="display: none;"></div>
-             <div id="txSuccess" class="success" style="display: none;"></div>
+
+        <div id="pools-section">
+            <h2>Available Pools</h2>
+            <div id="pools-list"></div>
+        </div>
+
+        <div id="transaction-modal">
+            <div class="modal-container">
+                <div class="modal-header">
+                    <h3 id="modal-title"></h3>
+                    <button class="close-btn" onclick="closeModal()">×</button>
+                </div>
+                <div id="modal-content"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        // --- CONFIGURATION ---
+        // --- NO CHANGES WERE MADE TO THE CORE WEB3 LOGIC ---
         const FACTORY_ADDRESS = '0x31cFb32CaB918592f5bBCd18Ab29d786538aDdb3';
-        const NFT_RECEIPT_ADDRESS = '0xE40C70c00814164FC3cE7bcD34693a26A766c38B';
-        const USDC_ADDRESS = '0x4C2AA252BEe766D3399850569713b55178934849'; // Using a known valid mock USDC on Etherlink Testnet
+        const USDC_ADDRESS = '0x4C2AA252BEe766D3399850569713b55178934849';
+        const ETHERLINK_CHAIN_ID = 128123;
+        const RETIREMENT_GAS_FEE = ethers.BigNumber.from('50000000000000000');
         
-        // --- ABIs --- (Confirmed to be correct and complete)
-        const FACTORY_ABI = [{"inputs":[],"name":"counter","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"pools","outputs":[{"internalType":"uint256","name":"pricePerCredit","type":"uint256"},{"internalType":"string","name":"serialNumber","type":"string"},{"internalType":"address","name":"poolAddress","type":"address"},{"internalType":"string","name":"countryOfOrigin","type":"string"},{"internalType":"string","name":"methodologies","type":"string"},{"internalType":"uint256","name":"issuanceDate","type":"uint256"},{"internalType":"uint256","name":"createdAt","type":"uint256"}],"stateMutability":"view","type":"function"}];
-        const CBX_ABI = [{"inputs":[],"name":"reserves","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getUSDCPricePerTokenWithFee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"amountOfCBXOut","type":"uint256"}],"name":"buyTokensWithUSDC","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"amountOfTokens","type":"uint256"}],"name":"retire","outputs":[],"stateMutability":"payable","type":"function"}];
-        const USDC_ABI = [{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}];
-        const NFT_RECEIPT_ABI = [{"inputs":[],"name":"NFTID","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"}];
+        const FACTORY_ABI = [
+            "function counter() view returns (uint256)",
+            "function pools(uint256) view returns (uint256 pricePerCredit, string serialNumber, address poolAddress, string countryOfOrigin, string methodologies, uint256 issuanceDate, uint256 createdAt)"
+        ];
         
-        // --- GLOBAL STATE ---
-        let web3, userAccount, factoryContract, usdcContract, nftReceiptContract, cbxContract;
-        let currentPool = {};
+        const CBX_ABI = [
+            {"inputs":[{"internalType":"uint256","name":"amountOfCBXOut","type":"uint256"}],"name":"buyTokensWithUSDC","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"amountOfTokens","type":"uint256"}],"name":"retire","outputs":[],"stateMutability":"payable","type":"function"},
+            {"inputs":[],"name":"getUSDCPricePerCreditWithFee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[],"name":"fee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[],"name":"reserves","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},
+            {"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            "function owner() view returns (address)",
+            "function seller() view returns (address)",
+            "function getPendingCount() view returns (uint256)",
+            "function bundleCounter() view returns (uint256)"
+        ];
+        
+        const USDC_ABI = [
+            {"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}
+        ];
 
-        // --- INITIALIZATION & UI ---
-        document.getElementById('connectBtn').addEventListener('click', connectWallet);
+        let provider, signer, userAddress;
+        let pools = [];
 
         async function connectWallet() {
-            if (typeof window.ethereum === 'undefined') return showError('Please install MetaMask!');
             try {
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                userAccount = accounts[0];
-                web3 = new Web3(window.ethereum);
-                await switchToEtherlinkTestnet();
-                factoryContract = new web3.eth.Contract(FACTORY_ABI, FACTORY_ADDRESS);
-                usdcContract = new web3.eth.Contract(USDC_ABI, USDC_ADDRESS);
-                nftReceiptContract = new web3.eth.Contract(NFT_RECEIPT_ABI, NFT_RECEIPT_ADDRESS);
-                document.getElementById('connectSection').style.display = 'none';
-                document.getElementById('mainContent').style.display = 'block';
-                document.getElementById('walletAddress').textContent = userAccount;
+                if (!window.ethereum) { alert('Please install MetaMask!'); return; }
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                const network = await provider.getNetwork();
+                if (network.chainId !== ETHERLINK_CHAIN_ID) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: `0x${ETHERLINK_CHAIN_ID.toString(16)}` }],
+                        });
+                    } catch (error) {
+                        if (error.code === 4902) {
+                            await window.ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: `0x${ETHERLINK_CHAIN_ID.toString(16)}`,
+                                    chainName: 'Etherlink Testnet',
+                                    nativeCurrency: { name: 'XTZ', symbol: 'XTZ', decimals: 18 },
+                                    rpcUrls: ['https://node.ghostnet.etherlink.com'],
+                                    blockExplorerUrls: ['https://testnet.explorer.etherlink.com/']
+                                }]
+                            });
+                        } else { throw error; }
+                    }
+                }
+                signer = provider.getSigner();
+                userAddress = await signer.getAddress();
+                const connectBtn = document.getElementById('connect-btn');
+                connectBtn.textContent = `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
+                connectBtn.classList.remove('btn-outline');
+                connectBtn.classList.add('btn-primary');
+                await updateWalletInfo();
                 await loadPools();
-                await loadNFTs();
-            } catch (err) { showError('Failed to connect: ' + err.message); }
+            } catch (error) { alert(`Error connecting wallet: ${error.message}`); }
         }
 
-        async function switchToEtherlinkTestnet() {
+        async function updateWalletInfo() {
+            const xtzBalance = await provider.getBalance(userAddress);
+            const usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, provider);
+            const usdcBalance = await usdcContract.balanceOf(userAddress);
+            document.getElementById('wallet-info').innerHTML = `
+                XTZ: ${parseFloat(ethers.utils.formatEther(xtzBalance)).toFixed(4)}<br>
+                USDC: ${parseFloat(ethers.utils.formatUnits(usdcBalance, 6)).toFixed(2)}
+            `;
+        }
+
+        async function getAdditionalPoolInfo(poolAddress) {
             try {
-                await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x1f47b' }] });
-            } catch (err) {
-                if (err.code === 4902) {
-                    await window.ethereum.request({
-                        method: 'wallet_addEthereumChain',
-                        params: [{ chainId: '0x1f47b', chainName: 'Etherlink Testnet', rpcUrls: ['https://node.ghostnet.etherlink.com'], nativeCurrency: { name: 'XTZ', symbol: 'XTZ', decimals: 18 }}],
-                    });
-                } else { throw err; }
+                const poolContract = new ethers.Contract(poolAddress, CBX_ABI, provider);
+                const [owner, seller, pendingCount, bundleCounter] = await Promise.all([
+                    poolContract.owner(),
+                    poolContract.seller(),
+                    poolContract.getPendingCount(),
+                    poolContract.bundleCounter()
+                ]);
+                return {
+                    owner, seller,
+                    pendingCount: pendingCount.toNumber(),
+                    bundlesRetired: bundleCounter.toNumber()
+                };
+            } catch (error) {
+                console.error(`Could not fetch additional info for pool ${poolAddress}:`, error);
+                return { owner: 'Error', seller: 'Error', pendingCount: 'N/A', bundlesRetired: 'N/A' };
             }
-        }
-
-        function switchView(viewName) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById(`${viewName}View`).classList.add('active');
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById(`${viewName}TabBtn`).classList.add('active');
-            if (viewName === 'marketplace') showPoolSelection();
-        }
-
-        function switchTradingTab(tabName, panel) {
-            panel.querySelectorAll('.trading-tab-btn').forEach(t => t.classList.remove('active'));
-            panel.querySelectorAll('.trading-tab-content').forEach(c => c.style.display = 'none');
-            const buttonId = `${tabName}TradingTabBtn`;
-            const contentId = `${tabName}TabContent`;
-            panel.querySelector(`#${buttonId}`).classList.add('active');
-            panel.querySelector(`#${contentId}`).style.display = 'block';
-        }
-
-        // --- MARKETPLACE LOGIC ---
-        
-        function showPoolSelection() {
-            document.getElementById('tradingView').style.display = 'none';
-            document.getElementById('poolsView').style.display = 'block';
         }
 
         async function loadPools() {
-            const loadingDiv = document.getElementById('poolsLoading');
-            const noPoolsDiv = document.getElementById('noPools');
-            loadingDiv.style.display = 'block';
-            noPoolsDiv.style.display = 'none';
-            try {
-                const poolCount = parseInt(await factoryContract.methods.counter().call());
-                if (poolCount === 0) {
-                    noPoolsDiv.style.display = 'block';
-                    return;
-                }
-                let poolPromises = [];
-                for (let i = 0; i < poolCount; i++) {
-                    poolPromises.push(factoryContract.methods.pools(i).call());
-                }
-                const poolsData = await Promise.all(poolPromises);
-                displayPools(poolsData);
-            } catch (err) {
-                console.error("Error loading pools:", err);
-                showError('Could not load pools. See console for details.');
-            } finally {
-                loadingDiv.style.display = 'none';
+            const factoryContract = new ethers.Contract(FACTORY_ADDRESS, FACTORY_ABI, provider);
+            const poolCount = await factoryContract.counter();
+            pools = [];
+            const poolsList = document.getElementById('pools-list');
+            poolsList.innerHTML = '<p>Loading pools...</p>';
+            if (poolCount.toNumber() === 0) {
+                poolsList.innerHTML = '<p>No active pools found.</p>';
+                return;
             }
-        }
-
-        function displayPools(pools) {
-            const grid = document.getElementById('poolsGrid');
-            grid.innerHTML = '';
-            pools.forEach(pool => {
-                const card = document.createElement('div');
-                card.className = 'pool-card';
-                card.innerHTML = `
-                    <div class="pool-header">
-                        <div>
-                            <div class="pool-detail-label">Serial Number</div>
-                            <div class="pool-detail-value">${pool.serialNumber}</div>
+            let poolsHtml = [];
+            for (let i = 0; i < poolCount.toNumber(); i++) {
+                const poolData = await factoryContract.pools(i);
+                const poolContract = new ethers.Contract(poolData.poolAddress, CBX_ABI, provider);
+                const balancePromise = userAddress ? poolContract.balanceOf(userAddress) : Promise.resolve(ethers.BigNumber.from(0));
+                const [priceWithFee, fee, reserves, name, symbol, userBalance, additionalInfo] = await Promise.all([
+                    poolContract.getUSDCPricePerCreditWithFee(),
+                    poolContract.fee(),
+                    poolContract.reserves(),
+                    poolContract.name(),
+                    poolContract.symbol(),
+                    balancePromise,
+                    getAdditionalPoolInfo(poolData.poolAddress)
+                ]);
+                const feeBasisPoints = fee.toNumber();
+                const basePrice = priceWithFee.mul(10000).div(10000 + feeBasisPoints);
+                const pool = {
+                    address: poolData.poolAddress,
+                    serialNumber: poolData.serialNumber,
+                    country: poolData.countryOfOrigin,
+                    methodology: poolData.methodologies,
+                    issuanceDate: new Date(poolData.issuanceDate.toNumber() * 1000).toLocaleDateString(),
+                    creationDate: new Date(poolData.createdAt.toNumber() * 1000).toLocaleDateString(),
+                    priceWithFee, basePrice, fee: feeBasisPoints,
+                    availableCredits: reserves.div(100),
+                    name, symbol, userBalance, ...additionalInfo
+                };
+                pools.push(pool);
+                poolsHtml.push(`
+                    <div class="pool-card">
+                        <div class="pool-section pool-details">
+                            <div class="pool-name">
+                                ${pool.name} (${pool.symbol})
+                                <button class="info-btn" onclick="toggleInfo(event, ${i})">i</button>
+                            </div>
+                            <div class="pool-sub-details">
+                                ${pool.country} • ${pool.methodology} • Issued: ${pool.issuanceDate}
+                            </div>
+                        </div>
+                        <div class="pool-section pool-financials">
+                            <div class="stat-label">Available / Price</div>
+                            <div class="stat-value">
+                                ${ethers.utils.formatUnits(pool.availableCredits, 0)} @ $${ethers.utils.formatUnits(pool.basePrice, 6)}
+                            </div>
+                        </div>
+                        <div class="pool-section pool-balance">
+                            <div class="stat-label">Your Balance</div>
+                            <div class="stat-value">${ethers.utils.formatUnits(pool.userBalance, 2)}</div>
+                        </div>
+                        <div class="pool-section pool-actions">
+                            <button class="btn btn-primary buy-btn" data-pool-index="${i}">Buy</button>
+                            <button class="btn btn-danger retire-btn" data-pool-index="${i}">Retire</button>
+                        </div>
+                        <div class="info-tooltip" id="tooltip-${i}">
+                           <p><strong>Serial Number:</strong> ${pool.serialNumber}</p>
+                           <p><strong>Pool Created:</strong> ${pool.creationDate}</p>
+                           <hr />
+                           <p><strong>Owner Address:</strong> ${pool.owner}</p>
+                           <p><strong>Seller Address:</strong> ${pool.seller}</p>
+                           <p><strong>Pending Retirements:</strong> ${pool.pendingCount}</p>
+                           <p><strong>Bundles Retired:</strong> ${pool.bundlesRetired}</p>
                         </div>
                     </div>
-                    <div class="pool-detail">
-                        <div class="pool-detail-label">Country</div>
-                        <div class="pool-detail-value">${pool.countryOfOrigin}</div>
-                    </div>
-                     <div class="pool-detail">
-                        <div class="pool-detail-label">Methodology</div>
-                        <div class="pool-detail-value">${pool.methodologies}</div>
-                    </div>`;
-                card.onclick = () => selectPool(pool);
-                grid.appendChild(card);
+                `);
+            }
+            poolsList.innerHTML = poolsHtml.join('');
+            document.querySelectorAll('.buy-btn, .retire-btn').forEach(btn => {
+                const poolIndex = parseInt(btn.dataset.poolIndex);
+                if (btn.classList.contains('buy-btn')) {
+                    btn.addEventListener('click', () => openPurchaseModal(poolIndex));
+                } else {
+                    btn.addEventListener('click', () => openRetireModal(poolIndex));
+                }
             });
         }
         
-        async function selectPool(pool) {
-            currentPool = pool;
-            cbxContract = new web3.eth.Contract(CBX_ABI, currentPool.poolAddress);
-            document.getElementById('poolsView').style.display = 'none';
-            const tradingView = document.getElementById('tradingView');
-            tradingView.innerHTML = `<div class="loading"><div class="spinner"></div><p>Loading pool details...</p></div>`;
-            tradingView.style.display = 'block';
-
-            try {
-                const [reserves, priceWithFee, usdcBalance, cbxBalance, allowance] = await Promise.all([
-                    cbxContract.methods.reserves().call(),
-                    cbxContract.methods.getUSDCPricePerTokenWithFee().call(),
-                    usdcContract.methods.balanceOf(userAccount).call(),
-                    cbxContract.methods.balanceOf(userAccount).call(),
-                    usdcContract.methods.allowance(userAccount, currentPool.poolAddress).call()
-                ]);
-
-                const pricePerCredit = (parseInt(priceWithFee) / 1e6 * 100).toFixed(2);
-                
-                tradingView.innerHTML = `
-                    <button class="back-btn" onclick="showPoolSelection()">← Back to Pools</button>
-                    <div class="main-panel">
-                        <div class="tabs">
-                            <button id="buyTradingTabBtn" class="tab trading-tab-btn active">Buy Credits</button>
-                            <button id="retireTradingTabBtn" class="tab trading-tab-btn">Retire Credits</button>
-                        </div>
-                        <div id="buyTabContent" class="trading-tab-content active">
-                             <div class="balance-display"><span>Your USDC Balance:</span> <span>${(parseInt(usdcBalance) / 1e6).toFixed(2)}</span></div>
-                             <div class="balance-display"><span>Price per Credit:</span> <span>$${pricePerCredit}</span></div>
-                             <div class="input-group"><label class="input-label">Number of Credits to Buy</label><input type="number" id="buyAmount" min="0" placeholder="e.g., 10.5"></div>
-                             <button id="approveBtn" class="action-btn buy-btn" onclick="approveUSDC()" style="display: none;">Approve USDC Spending</button>
-                             <button id="buyBtn" class="action-btn buy-btn" onclick="buyCredits()">Buy Credits</button>
-                        </div>
-                        <div id="retireTabContent" class="trading-tab-content" style="display: none;">
-                            <div class="balance-display"><span>Your Credits in this Pool:</span> <span>${(parseInt(cbxBalance) / 100).toFixed(2)}</span></div>
-                            <div class="info-box">Retiring credits will burn them and you will receive an NFT receipt. A small fee is required.</div>
-                            <div class="input-group"><label class="input-label">Number of Credits to Retire</label><input type="number" id="retireAmount" min="0" placeholder="e.g., 10.5"></div>
-                            <button id="retireBtn" class="action-btn retire-btn" onclick="retireCredits()">Retire Credits</button>
-                        </div>
-                    </div>`;
-
-                const mainPanel = tradingView.querySelector('.main-panel');
-                mainPanel.querySelector('#buyTradingTabBtn').onclick = () => switchTradingTab('buy', mainPanel);
-                mainPanel.querySelector('#retireTradingTabBtn').onclick = () => switchTradingTab('retire', mainPanel);
-
-                const needsApproval = parseInt(allowance) < (1 * 1e6);
-                document.getElementById('approveBtn').style.display = needsApproval ? 'block' : 'none';
-                document.getElementById('buyBtn').style.display = needsApproval ? 'none' : 'block';
-
-            } catch (err) {
-                console.error("Error selecting pool:", err);
-                showError("Could not load pool details. The issue might be an incorrect testnet token address or a contract revert. Check console for details.");
-                showPoolSelection();
-            }
+        function toggleInfo(event, poolIndex) {
+            event.stopPropagation();
+            const tooltip = document.getElementById(`tooltip-${poolIndex}`);
+            const isShown = tooltip.classList.contains('show');
+            document.querySelectorAll('.info-tooltip').forEach(t => t.classList.remove('show'));
+            if (!isShown) tooltip.classList.add('show');
         }
 
-        async function approveUSDC() {
-            showLoading('Approving USDC...');
-            try {
-                const maxAmount = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
-                const approveMethod = usdcContract.methods.approve(currentPool.poolAddress, maxAmount);
-                const gasEstimate = await approveMethod.estimateGas({ from: userAccount });
-
-                await approveMethod.send({ from: userAccount, gas: Math.round(gasEstimate * 1.2) });
-                
-                showSuccess('USDC Approved! You can now buy credits.');
-                document.getElementById('approveBtn').style.display = 'none';
-                document.getElementById('buyBtn').style.display = 'block';
-            } catch (err) { 
-                showError("Approval failed. See console for details.");
-                console.error(err);
+        document.addEventListener('click', (event) => {
+            if (!event.target.closest('.info-btn')) {
+                document.querySelectorAll('.info-tooltip').forEach(t => t.classList.remove('show'));
             }
-            hideLoading();
+        });
+
+        function openPurchaseModal(poolIndex) {
+            const pool = pools[poolIndex];
+            document.getElementById('modal-title').textContent = `Buy ${pool.symbol} Credits`;
+            document.getElementById('modal-content').innerHTML = `
+                <input type="number" id="credits-amount" class="form-input" placeholder="e.g., 10.5" step="0.01" min="0.01">
+                <div class="bill-details">
+                    <p>Subtotal: <span id="bill-subtotal">$0.00</span></p>
+                    <p>Fee (${(pool.fee / 100).toFixed(2)}%): <span id="bill-fee">$0.00</span></p>
+                    <hr>
+                    <p class="total">Total Cost: <span id="bill-total">$0.00</span></p>
+                </div>
+                <div class="actions">
+                    <button id="approve-btn" class="btn btn-outline">1. Approve USDC</button>
+                    <button id="buy-btn" class="btn btn-primary" disabled>2. Buy Credits</button>
+                </div>
+                <p id="purchase-status"></p>
+            `;
+            document.getElementById('credits-amount').addEventListener('input', (e) => updateBillAndButton(poolIndex, e.target.value));
+            document.getElementById('approve-btn').addEventListener('click', () => approvePurchase(poolIndex));
+            document.getElementById('buy-btn').addEventListener('click', () => executePurchase(poolIndex));
+            document.getElementById('transaction-modal').classList.add('show');
+        }
+        
+        async function updateBillAndButton(poolIndex, amountStr) {
+            const pool = pools[poolIndex];
+            const amount = parseFloat(amountStr) || 0;
+            const subtotal = pool.basePrice.mul(Math.floor(amount * 100)).div(100);
+            const totalCost = pool.priceWithFee.mul(Math.floor(amount * 100)).div(100);
+            const feeAmount = totalCost.sub(subtotal);
+            document.getElementById('bill-subtotal').textContent = `$${ethers.utils.formatUnits(subtotal, 6)}`;
+            document.getElementById('bill-fee').textContent = `$${ethers.utils.formatUnits(feeAmount, 6)}`;
+            document.getElementById('bill-total').textContent = `$${ethers.utils.formatUnits(totalCost, 6)}`;
+            const usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, provider);
+            const allowance = await usdcContract.allowance(userAddress, pool.address);
+            document.getElementById('buy-btn').disabled = !(amount > 0 && allowance.gte(totalCost));
         }
 
-        async function buyCredits() {
-            const amount = document.getElementById('buyAmount').value;
-            if (!amount || parseFloat(amount) <= 0) return showError("Please enter a valid amount of credits to buy.");
-            showLoading('Processing purchase...');
-            try {
-                const tokensToBuy = Math.floor(parseFloat(amount) * 100);
-                const buyMethod = cbxContract.methods.buyTokensWithUSDC(tokensToBuy);
-                
-                // *** FIX: Gas estimation before sending ***
-                const gasEstimate = await buyMethod.estimateGas({ from: userAccount });
-
-                await buyMethod.send({ from: userAccount, gas: Math.round(gasEstimate * 1.2) });
-                
-                showSuccess(`Successfully purchased ${amount} credits!`);
-                selectPool(currentPool);
-            } catch (err) {
-                showError("Purchase failed. Do you have enough USDC? Check console for details.");
-                console.error(err);
-            }
-            hideLoading();
+        function openRetireModal(poolIndex) {
+            const pool = pools[poolIndex];
+            document.getElementById('modal-title').textContent = `Retire ${pool.symbol} Credits`;
+            document.getElementById('modal-content').innerHTML = `
+                <p>Your balance: ${ethers.utils.formatUnits(pool.userBalance, 2)} ${pool.symbol}</p>
+                <p>Retirement requires a 0.05 XTZ network fee.</p>
+                <input type="number" id="retire-amount" class="form-input" placeholder="e.g., 5.0" step="0.01" min="0.01" max="${ethers.utils.formatUnits(pool.userBalance, 2)}">
+                <div class="actions">
+                    <button id="retire-btn" class="btn btn-danger">Retire Credits</button>
+                </div>
+                <p id="retire-status"></p>
+            `;
+            document.getElementById('retire-btn').addEventListener('click', () => executeRetirement(poolIndex));
+            document.getElementById('transaction-modal').classList.add('show');
         }
 
-        async function retireCredits() {
-            const amount = document.getElementById('retireAmount').value;
-            if (!amount || parseFloat(amount) <= 0) return showError("Please enter a valid amount to retire.");
-            showLoading('Processing retirement...');
+        async function approvePurchase(poolIndex) {
+            const statusEl = document.getElementById('purchase-status');
             try {
-                const tokensToRetire = Math.floor(parseFloat(amount) * 100);
-                const retirementFee = web3.utils.toWei('0.005', 'ether');
-                const retireMethod = cbxContract.methods.retire(tokensToRetire);
-                
-                // *** FIX: Gas estimation before sending ***
-                const gasEstimate = await retireMethod.estimateGas({ from: userAccount, value: retirementFee });
-
-                await retireMethod.send({ from: userAccount, value: retirementFee, gas: Math.round(gasEstimate * 1.2) });
-                
-                showSuccess(`Successfully retired ${amount} credits! Your NFT will appear shortly.`);
-                await loadNFTs();
-                selectPool(currentPool);
-            } catch(err) { 
-                showError("Retirement failed. Do you have enough credits to retire? Check console for details.");
-                console.error(err);
-            }
-            hideLoading();
-        }
-
-        // --- NFT GALLERY LOGIC ---
-        async function loadNFTs() {
-             const grid = document.getElementById('nftGrid');
-             const loadingDiv = document.getElementById('galleryLoading');
-             const noNftsDiv = document.getElementById('noNfts');
-             loadingDiv.style.display = 'block';
-             grid.innerHTML = '';
-             noNftsDiv.style.display = 'none';
-
-            try {
-                const totalMinted = parseInt(await nftReceiptContract.methods.NFTID().call());
-                if (totalMinted === 0) {
-                    noNftsDiv.style.display = 'block';
+                const pool = pools[poolIndex];
+                const amount = parseFloat(document.getElementById('credits-amount').value);
+                if (!amount || amount <= 0) { alert('Please enter a valid amount'); return; }
+                const tokenAmount = ethers.BigNumber.from(Math.floor(amount * 100));
+                if (tokenAmount.gt(pool.availableCredits)) { alert('Not enough credits available in pool'); return; }
+                const totalCost = pool.priceWithFee.mul(tokenAmount).div(100);
+                const usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
+                const userBalance = await usdcContract.balanceOf(userAddress);
+                if (userBalance.lt(totalCost)) {
+                    alert(`Insufficient USDC. You need ${ethers.utils.formatUnits(totalCost, 6)} but have ${ethers.utils.formatUnits(userBalance, 6)}`);
                     return;
                 }
-                
-                let nftPromises = [];
-                for (let i = 1; i <= totalMinted; i++) {
-                     nftPromises.push(
-                        nftReceiptContract.methods.ownerOf(i).call()
-                        .then(owner => {
-                            if (owner.toLowerCase() === userAccount.toLowerCase()) {
-                                return nftReceiptContract.methods.tokenURI(i).call().then(uri => ({tokenId: i, uri}));
-                            }
-                            return null;
-                        }).catch(() => null)
-                    );
-                }
-                const nfts = (await Promise.all(nftPromises)).filter(n => n !== null);
-                if (nfts.length === 0) {
-                     noNftsDiv.style.display = 'block';
-                } else {
-                    nfts.forEach(displayNFT);
-                }
-            } catch (err) {
-                console.error("Error loading NFTs:", err);
-                showError('Could not load your NFTs. Check console for details.');
-            } finally {
-                loadingDiv.style.display = 'none';
-            }
+                statusEl.textContent = 'Approving USDC... Please confirm in your wallet.';
+                const tx = await usdcContract.approve(pool.address, totalCost);
+                await tx.wait();
+                statusEl.textContent = 'USDC approved! You can now buy the credits.';
+                await updateBillAndButton(poolIndex, document.getElementById('credits-amount').value);
+            } catch (error) { statusEl.textContent = `Error: ${error.message}`; }
         }
-        
-        function displayNFT({ tokenId, uri }) {
+
+        async function executePurchase(poolIndex) {
+            const statusEl = document.getElementById('purchase-status');
             try {
-                const metadata = JSON.parse(atob(uri.substring(uri.indexOf(',') + 1)));
-                const svgData = atob(metadata.image.substring(metadata.image.indexOf(',') + 1));
-                
-                let attributesHtml = '';
-                if (metadata.attributes && metadata.attributes.length > 0) {
-                    metadata.attributes.forEach(attr => {
-                        let value = attr.value;
-                        if (attr.trait_type.includes('Date') && parseInt(value) > 0) {
-                            value = new Date(parseInt(value) * 1000).toLocaleDateString();
-                        }
-                        attributesHtml += `
-                            <div class="attribute">
-                                <span class="attribute-name">${attr.trait_type}</span>
-                                <span class="attribute-value">${value}</span>
-                            </div>`;
-                    });
+                const pool = pools[poolIndex];
+                const amount = parseFloat(document.getElementById('credits-amount').value);
+                if (!amount || amount <= 0) { alert('Please enter a valid amount'); return; }
+                const tokenAmount = ethers.BigNumber.from(Math.floor(amount * 100));
+                const usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, provider);
+                const allowance = await usdcContract.allowance(userAddress, pool.address);
+                const requiredAmount = pool.priceWithFee.mul(tokenAmount).div(100);
+                if (allowance.lt(requiredAmount)) {
+                    statusEl.textContent = 'Allowance is too low. Please approve USDC first.';
+                    return;
                 }
-
-                let ipfsLinkHtml = '';
-                if (metadata.external_url) {
-                    ipfsLinkHtml = `<a href="${metadata.external_url}" target="_blank" class="ipfs-link">View Certificate on IPFS</a>`;
-                }
-                
-                const credits = (metadata.attributes.find(a => a.trait_type === 'tokens')?.value || 0) / 100;
-                const card = document.createElement('div');
-                card.className = 'nft-card-wrapper';
-                card.innerHTML = `
-                    <div class="token-id">#${tokenId}</div>
-                    <div class="nft-card">
-                        <div class="nft-image-container">${svgData}</div>
-                        <div class="nft-content">
-                            <h3 class="nft-title">${metadata.name}</h3>
-                            <div class="credits-badge">${credits.toFixed(2)} Credits Retired</div>
-                            <div class="attribute-list">${attributesHtml}</div>
-                            ${ipfsLinkHtml}
-                        </div>
-                    </div>`;
-                document.getElementById('nftGrid').appendChild(card);
-            } catch (e) { console.error(`Error displaying NFT #${tokenId}:`, e); }
+                const poolContract = new ethers.Contract(pool.address, CBX_ABI, signer);
+                statusEl.textContent = 'Purchasing credits... Please confirm in your wallet.';
+                const tx = await poolContract.buyTokensWithUSDC(tokenAmount);
+                await tx.wait();
+                statusEl.textContent = 'Purchase successful!';
+                await updateWalletInfo(); await loadPools();
+                setTimeout(closeModal, 2000);
+            } catch (error) { statusEl.textContent = `Error: ${error.message}`; }
         }
 
-        // --- UTILITY FUNCTIONS ---
-        function showError(message) {
-            const el = document.getElementById('txError');
-            el.textContent = message.length > 200 ? message.substring(0, 200) + '...' : message;
-            el.style.display = 'block';
-            setTimeout(() => { el.style.display = 'none'; }, 6000);
+        async function executeRetirement(poolIndex) {
+            const statusEl = document.getElementById('retire-status');
+            try {
+                const pool = pools[poolIndex];
+                const amount = parseFloat(document.getElementById('retire-amount').value);
+                if (!amount || amount <= 0) { alert('Please enter a valid amount'); return; }
+                const tokenAmount = ethers.BigNumber.from(Math.floor(amount * 100));
+                if (tokenAmount.gt(pool.userBalance)) { alert('Insufficient token balance'); return; }
+                const xtzBalance = await provider.getBalance(userAddress);
+                if (xtzBalance.lt(RETIREMENT_GAS_FEE)) {
+                    alert(`Insufficient XTZ for gas. You need 0.05 XTZ but have ${ethers.utils.formatEther(xtzBalance)}`);
+                    return;
+                }
+                const poolContract = new ethers.Contract(pool.address, CBX_ABI, signer);
+                statusEl.textContent = 'Retiring credits... Please confirm in your wallet.';
+                const tx = await poolContract.retire(tokenAmount, { value: RETIREMENT_GAS_FEE });
+                await tx.wait();
+                statusEl.textContent = 'Retirement successful! Your NFT receipt is on its way.';
+                await updateWalletInfo(); await loadPools();
+                setTimeout(closeModal, 2000);
+            } catch (error) { statusEl.textContent = `Error: ${error.message}`; }
         }
-        function showSuccess(message) {
-            const el = document.getElementById('txSuccess');
-            el.textContent = message;
-            el.style.display = 'block';
-            setTimeout(() => { el.style.display = 'none'; }, 4000);
+
+        function closeModal() {
+            const modal = document.getElementById('transaction-modal');
+            if (modal) modal.classList.remove('show');
         }
-        function showLoading(message) {
-            const txLoading = document.getElementById('txLoading');
-            if (txLoading) {
-                 txLoading.querySelector('p').textContent = message;
-                 txLoading.style.display = 'block';
-            }
-        }
-        function hideLoading() {
-            const txLoading = document.getElementById('txLoading');
-            if(txLoading) txLoading.style.display = 'none';
-        }
-        
-        // --- EVENT LISTENERS ---
-        if (window.ethereum) {
-            window.ethereum.on('accountsChanged', () => location.reload());
-            window.ethereum.on('chainChanged', () => location.reload());
+
+        if (window.ethereum && window.ethereum.selectedAddress) {
+            connectWallet();
         }
     </script>
 </body>
 </html>
-

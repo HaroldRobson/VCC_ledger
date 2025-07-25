@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carbon Credits DApp</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <h1>Carbon Credits DApp</h1>
+        
+        <div id="wallet-section">
+            <button id="connect-btn" onclick="connectWallet()">Connect Wallet</button>
+            <div id="wallet-info"></div>
+        </div>
+
+        <div id="pools-section">
+            <h2>Available Pools</h2>
+            <div id="pools-list"></div>
+        </div>
+
+        <div id="transaction-modal" style="display:none; border:1px solid black; padding:20px; margin:20px;">
+            <h3 id="modal-title"></h3>
+            <div id="modal-content"></div>
+            <button onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        const FACTORY_ADDRESS = '0x31cFb32CaB918592f5bBCd18Ab29d786538aDdb3';
+        const USDC_ADDRESS = '0x4C2AA252BEe766D3399850569713b55178934849';
+        const ETHERLINK_CHAIN_ID = 128123;
+        const RETIREMENT_GAS_FEE = ethers.BigNumber.from('50000000000000000'); // 0.05 XTZ in wei
+        
+        const FACTORY_ABI = [
+            "function counter() view returns (uint256)",
+            "function pools(uint256) view returns (uint256 pricePerCredit, string serialNumber, address poolAddress, string countryOfOrigin, string methodologies, uint256 issuanceDate, uint256 createdAt)"
+        ];
+        
+        const CBX_ABI = [
+            {"inputs":[{"internalType":"uint256","name":"amountOfCBXOut","type":"uint256"}],"name":"buyTokensWithUSDC","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"amountOfTokens","type":"uint256"}],"name":"retire","outputs":[],"stateMutability":"payable","type":"function"},
+            {"inputs":[],"name":"getUSDCPricePerCreditWithFee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[],"name":"fee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[],"name":"reserves","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},
+            {"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}
+        ];
+        
+        const USDC_ABI = [
+            {"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}
+        ];
+
+        let provider, signer, userAddress;
+        let pools = [];
+
+        async function connectWallet() {
+            try {
+                if (!window.ethereum) {
+                    alert('Please install MetaMask!');
+                    return;
+                }
+
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                
+                const network = await provider.getNetwork();
+                if (network.chainId !== ETHERLINK_CHAIN_ID) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: `0x${ETHERLINK_CHAIN_ID.toString(16)}` }],
+                        });
+                    } catch (error) {
+                        if (error.code === 4902) {
+                            await window.ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: `0x${ETHERLINK_CHAIN_ID.toString(16)}`,
+                                    chainName: 'Etherlink Testnet',
+                                    nativeCurrency: { name: 'XTZ', symbol: 'XTZ', decimals: 18 },
+                                    rpcUrls: ['https://node.ghostnet.etherlink.com'],
+                                    blockExplorerUrls: ['https://testnet.explorer.etherlink.com/']
+                                }]
+                            });
+                        } else {
+                            throw error;
+                        }
+                    }
+                }
+
+                signer = provider.getSigner();
+                userAddress = await signer.getAddress();
+                
+                document.getElementById('connect-btn').textContent = userAddress.slice(0, 6) + '...' + userAddress.slice(-4);
+                await updateWalletInfo();
+                await loadPools();
+            } catch (error) {
+                alert('Error connecting wallet: ' + error.message);
+            }
+        }
+
+        async function updateWalletInfo() {
+            const xtzBalance = await provider.getBalance(userAddress);
+            const usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, provider);
+            const usdcBalance = await usdcContract.balanceOf(userAddress);
+            
+            document.getElementById('wallet-info').innerHTML = `
+                XTZ: ${ethers.utils.formatEther(xtzBalance)}<br>
+                USDC: ${ethers.utils.formatUnits(usdcBalance, 6)}
+            `;
+        }
+
+        async function loadPools() {
+            const factoryContract = new ethers.Contract(FACTORY_ADDRESS, FACTORY_ABI, provider);
+            const poolCount = await factoryContract.counter();
+            
+            pools = [];
+            const poolsHtml = [];
+            
+            for (let i = 0; i < poolCount.toNumber(); i++) {
+                const poolData = await factoryContract.pools(i);
+                const poolContract = new ethers.Contract(poolData.poolAddress, CBX_ABI, provider);
+                
+                const [priceWithFee, fee, reserves, name, symbol, userBalance] = await Promise.all([
+                    poolContract.getUSDCPricePerCreditWithFee(),
+                    poolContract.fee(),
+                    poolContract.reserves(),
+                    poolContract.name(),
+                    poolContract.symbol(),
+                    poolContract.balanceOf(userAddress)
+                ]);
+                
+                const pool = {
+                    address: poolData.poolAddress,
+                    serialNumber: poolData.serialNumber,
+                    country: poolData.countryOfOrigin,
+                    methodology: poolData.methodologies,
+                    issuanceDate: new Date(poolData.issuanceDate.toNumber() * 1000).toLocaleDateString(),
+                    priceWithFee: priceWithFee,
+                    fee: fee.toNumber(),
+                    availableCredits: reserves.div(100),
+                    name: name,
+                    symbol: symbol,
+                    userBalance: userBalance
+                };
+                
+                pools.push(pool);
+                
+                poolsHtml.push(`
+                    <div style="border:1px solid gray; padding:10px; margin:10px;">
+                        <h4>${pool.serialNumber} (${pool.symbol})</h4>
+                        <p>Country: ${pool.country}</p>
+                        <p>Methodology: ${pool.methodology}</p>
+                        <p>Available: ${ethers.utils.formatUnits(pool.availableCredits, 0)} credits</p>
+                        <p>Price: ${ethers.utils.formatUnits(pool.priceWithFee, 6)} per credit (includes ${pool.fee/100}% fee)</p>
+                        <p>Your balance: ${ethers.utils.formatUnits(pool.userBalance, 2)} ${pool.symbol}</p>
+                        <button class="buy-btn" data-pool-index="${i}">Buy Credits</button>
+                        <button class="retire-btn" data-pool-index="${i}">Retire Credits</button>
+                    </div>
+                `);
+            }
+            
+            document.getElementById('pools-list').innerHTML = poolsHtml.join('');
+            
+            // Add event listeners to buttons
+            document.querySelectorAll('.buy-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => openPurchaseModal(parseInt(e.target.dataset.poolIndex)));
+            });
+            document.querySelectorAll('.retire-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => openRetireModal(parseInt(e.target.dataset.poolIndex)));
+            });
+        }
+
+        function openPurchaseModal(poolIndex) {
+            const pool = pools[poolIndex];
+            document.getElementById('modal-title').textContent = `Buy ${pool.symbol} Credits`;
+            document.getElementById('modal-content').innerHTML = `
+                <p>Price per credit: $${ethers.utils.formatUnits(pool.priceWithFee, 6)}</p>
+                <p>Available credits: ${ethers.utils.formatUnits(pool.availableCredits, 0)}</p>
+                <input type="number" id="credits-amount" placeholder="Number of credits" step="0.01" min="0.01">
+                <p id="total-cost"></p>
+                <button id="approve-btn">Approve USDC</button>
+                <button id="buy-btn">Buy Credits</button>
+                <p id="purchase-status"></p>
+            `;
+            
+            document.getElementById('credits-amount').addEventListener('input', (e) => {
+                const amount = parseFloat(e.target.value) || 0;
+                const totalCost = pool.priceWithFee.mul(Math.floor(amount * 100)).div(100);
+                document.getElementById('total-cost').textContent = `Total cost: ${ethers.utils.formatUnits(totalCost, 6)}`;
+            });
+            
+            document.getElementById('approve-btn').addEventListener('click', () => approvePurchase(poolIndex));
+            document.getElementById('buy-btn').addEventListener('click', () => executePurchase(poolIndex));
+            
+            document.getElementById('transaction-modal').style.display = 'block';
+        }
+
+        function openRetireModal(poolIndex) {
+            const pool = pools[poolIndex];
+            document.getElementById('modal-title').textContent = `Retire ${pool.symbol} Credits`;
+            document.getElementById('modal-content').innerHTML = `
+                <p>Your balance: ${ethers.utils.formatUnits(pool.userBalance, 2)} ${pool.symbol}</p>
+                <p>Retirement gas fee: 0.05 XTZ</p>
+                <input type="number" id="retire-amount" placeholder="Credits to retire" step="0.01" min="0.01" max="${ethers.utils.formatUnits(pool.userBalance, 2)}">
+                <button id="retire-btn">Retire Credits</button>
+                <p id="retire-status"></p>
+            `;
+            
+            document.getElementById('retire-btn').addEventListener('click', () => executeRetirement(poolIndex));
+            
+            document.getElementById('transaction-modal').style.display = 'block';
+        }
+
+        async function approvePurchase(poolIndex) {
+            try {
+                const pool = pools[poolIndex];
+                const amount = parseFloat(document.getElementById('credits-amount').value);
+                
+                if (!amount || amount <= 0) {
+                    alert('Please enter a valid amount');
+                    return;
+                }
+                
+                const tokenAmount = ethers.BigNumber.from(Math.floor(amount * 100));
+                if (tokenAmount.gt(pool.availableCredits)) {
+                    alert('Not enough credits available in pool');
+                    return;
+                }
+                
+                const totalCost = pool.priceWithFee.mul(tokenAmount).div(100);
+                const approvalAmount = totalCost.add(ethers.utils.parseUnits('0.01', 6)); // Add buffer
+                
+                const usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
+                const userBalance = await usdcContract.balanceOf(userAddress);
+                
+                if (userBalance.lt(totalCost)) {
+                    alert(`Insufficient USDC balance. You need ${ethers.utils.formatUnits(totalCost, 6)} USDC but have ${ethers.utils.formatUnits(userBalance, 6)}`);
+                    return;
+                }
+                
+                document.getElementById('purchase-status').textContent = 'Approving USDC...';
+                const tx = await usdcContract.approve(pool.address, approvalAmount);
+                await tx.wait();
+                
+                document.getElementById('purchase-status').textContent = 'USDC approved! Now click Buy Credits.';
+            } catch (error) {
+                document.getElementById('purchase-status').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function executePurchase(poolIndex) {
+            try {
+                const pool = pools[poolIndex];
+                const amount = parseFloat(document.getElementById('credits-amount').value);
+                
+                if (!amount || amount <= 0) {
+                    alert('Please enter a valid amount');
+                    return;
+                }
+                
+                const tokenAmount = ethers.BigNumber.from(Math.floor(amount * 100));
+                
+                const usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, provider);
+                const allowance = await usdcContract.allowance(userAddress, pool.address);
+                const requiredAmount = pool.priceWithFee.mul(tokenAmount).div(100);
+                
+                if (allowance.lt(requiredAmount)) {
+                    alert('Please approve USDC first');
+                    return;
+                }
+                
+                const poolContract = new ethers.Contract(pool.address, CBX_ABI, signer);
+                document.getElementById('purchase-status').textContent = 'Purchasing credits...';
+                
+                const tx = await poolContract.buyTokensWithUSDC(tokenAmount);
+                await tx.wait();
+                
+                document.getElementById('purchase-status').textContent = 'Purchase successful!';
+                await updateWalletInfo();
+                await loadPools();
+                setTimeout(closeModal, 2000);
+            } catch (error) {
+                document.getElementById('purchase-status').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function executeRetirement(poolIndex) {
+            try {
+                const pool = pools[poolIndex];
+                const amount = parseFloat(document.getElementById('retire-amount').value);
+                
+                if (!amount || amount <= 0) {
+                    alert('Please enter a valid amount');
+                    return;
+                }
+                
+                const tokenAmount = ethers.BigNumber.from(Math.floor(amount * 100));
+                
+                if (tokenAmount.gt(pool.userBalance)) {
+                    alert('Insufficient token balance');
+                    return;
+                }
+                
+                const xtzBalance = await provider.getBalance(userAddress);
+                if (xtzBalance.lt(RETIREMENT_GAS_FEE)) {
+                    alert(`Insufficient XTZ for gas fee. You need 0.05 XTZ but have ${ethers.utils.formatEther(xtzBalance)}`);
+                    return;
+                }
+                
+                const poolContract = new ethers.Contract(pool.address, CBX_ABI, signer);
+                document.getElementById('retire-status').textContent = 'Retiring credits...';
+                
+                const tx = await poolContract.retire(tokenAmount, { value: RETIREMENT_GAS_FEE });
+                await tx.wait();
+                
+                document.getElementById('retire-status').textContent = 'Retirement successful!';
+                await updateWalletInfo();
+                await loadPools();
+                setTimeout(closeModal, 2000);
+            } catch (error) {
+                document.getElementById('retire-status').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('transaction-modal').style.display = 'none';
+        }
+
+        // Auto-connect if already connected
+        if (window.ethereum && window.ethereum.selectedAddress) {
+            connectWallet();
+        }
+    </script>
+</body>
+</html>
+

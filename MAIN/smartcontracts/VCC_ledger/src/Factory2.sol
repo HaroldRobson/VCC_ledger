@@ -10,14 +10,14 @@ contract Factory {
     uint256 public fee; // basis points
     address public owner;
 
-    struct Pool {
-        string name;
-        string serialNumber;
+    struct Pool { // <--NOTE--> all bytes32 here are converted from strings and must be converted back in the frontend. 
+        bytes32 name;
+        bytes32 serialNumber;
         address poolAddress;
-        string countryOfOrigin;
-        string methodologies;
-        string Registry;
-        string URL;
+        uint8 countryOfOrigin; //ISO code
+        bytes32 methodologies;
+        bytes32 Registry;
+        bytes32 URL;
         uint256 issuanceDate; // in block.timestamp notation
         uint256 createdAt;
         bool isActive;
@@ -45,7 +45,7 @@ contract Factory {
         uint256 pricePerCredit,
         string memory name,
         string memory serialNumber,
-        string memory countryOfOrigin,
+        uint8 countryOfOrigin,
         string memory methodologies,
         string memory registry,
         string memory url,
@@ -56,13 +56,13 @@ contract Factory {
         CBX poolContract = new CBX(fee, initialSupply, pricePerCredit, msg.sender, sellerAddress, serialNumber, counter);
         counter++;
         Pool memory pool = Pool({
-            name: name,
-            serialNumber: serialNumber,
+            name: stringToBytes32(name),
+            serialNumber: stringToBytes32(serialNumber),
             poolAddress: address(poolContract),
             countryOfOrigin: countryOfOrigin,
-            methodologies: methodologies,
-            Registry: registry,
-            URL: url,
+            methodologies: stringToBytes32(methodologies),
+            Registry: stringToBytes32(registry),
+            URL: stringToBytes32(url),
             issuanceDate: issuanceDate,
             createdAt: block.timestamp,
             isActive: true
@@ -85,4 +85,28 @@ contract Factory {
             }
         }
     }
+
+
+function stringToBytes32(string memory source) public pure returns (bytes32 result) {
+    bytes memory tempEmptyStringTest = bytes(source);
+    if (tempEmptyStringTest.length == 0) {
+        return 0x0;
+    }
+
+    assembly {
+        result := mload(add(source, 32))
+    }
+}
+
+function stringToBytes32(string memory source) public pure returns (bytes32 result) {
+        bytes memory tempEmptyStringTest = bytes(source);
+        if (tempEmptyStringTest.length == 0) {
+            return 0x0;
+        }
+
+        assembly {
+            result := mload(add(source, 32))
+        }
+    }
+
 }

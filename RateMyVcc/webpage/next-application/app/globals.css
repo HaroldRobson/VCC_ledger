@@ -7,41 +7,13 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 255, 255, 255;
   --background-end-rgb: 255, 255, 255;
-  background-color: #ffffff;
-}
-
-/* Light mode styles (default) */
-html {
-  background-color: #ffffff !important;
-}
-
-body {
-  background-color: #ffffff !important;
 }
 
 /* Dark mode styles */
-html.dark {
-  background-color: #171717 !important;
-}
-
-body.dark {
-  background-color: #171717 !important;
-}
-
 .dark {
   --foreground-rgb: 255, 255, 255;
   --background-start-rgb: 23, 23, 23;
   --background-end-rgb: 23, 23, 23;
-}
-
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
 }
 
 /* FAQ Section Animations */
@@ -97,6 +69,7 @@ body {
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
+  
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;

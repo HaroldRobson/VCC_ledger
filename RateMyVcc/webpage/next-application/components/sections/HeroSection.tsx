@@ -2,8 +2,9 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ChevronDown, ArrowRight, Leaf } from 'lucide-react';
+import { ChevronDown, ArrowRight, Leaf, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export function HeroSection() {
   const scrollToNext = () => {
@@ -104,21 +105,32 @@ export function HeroSection() {
               className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16"
             >
               <Button
-                onClick={scrollToWaitlist}
+                asChild
                 size="lg"
                 className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-10 py-4 text-lg rounded-full transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-green-500/25 inline-flex items-center"
+              >
+                <Link href="/trydemo">
+                  <Play className="mr-2 w-5 h-5" />
+                  Try Demo
+                </Link>
+              </Button>
+              <Button
+                onClick={scrollToWaitlist}
+                variant="outline"
+                size="lg"
+                className="border-2 border-green-500 text-green-600 hover:bg-green-50 dark:border-green-400 dark:text-green-400 dark:hover:bg-green-950 px-10 py-4 text-lg rounded-full transition-all duration-300 hover:scale-105 bg-white dark:bg-transparent"
               >
                 Get Early Access
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
-              <Button
+              {/* <Button
                 onClick={scrollToNext}
                 variant="outline"
                 size="lg"
                 className="border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white px-10 py-4 text-lg rounded-full transition-all duration-300 hover:scale-105 bg-white dark:bg-transparent"
               >
                 See How It Works
-              </Button>
+              </Button> */}
             </motion.div>
 
             <motion.div

@@ -72,8 +72,10 @@ export function WaitlistSection() {
                 <div className="flex-1 relative">
                   <input
                     type="email"
+                    autoComplete="off"
                     placeholder="Enter your email address"
                     value={email}
+                    // defaultValue={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     className="w-full pl-6 pr-6 py-4 bg-white dark:bg-[#232323] border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 focus:border-green-500 focus:outline-none text-lg"

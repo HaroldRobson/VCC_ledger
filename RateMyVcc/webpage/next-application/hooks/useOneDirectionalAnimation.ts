@@ -16,9 +16,12 @@ interface AnimationState {
 let lastScrollY = 0;
 let scrollDirection: 'up' | 'down' = 'down';
 let hasReachedBottom = false;
+let isScrollListenerSetup = false;
 
 // Track scroll direction globally to avoid multiple listeners
-if (typeof window !== 'undefined') {
+const setupScrollListener = () => {
+  if (typeof window === 'undefined' || isScrollListenerSetup) return;
+  
   const updateScrollDirection = () => {
     const currentScrollY = window.scrollY;
     scrollDirection = currentScrollY > lastScrollY ? 'down' : 'up';
@@ -48,7 +51,8 @@ if (typeof window !== 'undefined') {
   };
 
   window.addEventListener('scroll', requestScrollUpdate, { passive: true });
-}
+  isScrollListenerSetup = true;
+};
 
 export function useOneDirectionalAnimation<T extends HTMLElement = HTMLElement>(options: UseOneDirectionalAnimationOptions = {}) {
   const { threshold = 0.1, rootMargin = '-5% 0px -5% 0px' } = options;
@@ -58,6 +62,11 @@ export function useOneDirectionalAnimation<T extends HTMLElement = HTMLElement>(
     isVisible: false,
     shouldAnimate: false
   });
+
+  // Set up scroll listener on first use
+  useEffect(() => {
+    setupScrollListener();
+  }, []);
 
   const updateAnimationState = useCallback((isIntersecting: boolean) => {
     setState(prevState => {

@@ -3,8 +3,21 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Menu, X, Sun, Moon, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
-export function Navigation() {
+interface NavigationProps {
+  navItems?: { name: string; href: string }[];
+  showWaitlistButton?: boolean;
+}
+
+export function Navigation({ 
+  navItems = [
+    { name: 'Rate Credits', href: '#rate-credits' },
+    { name: 'Comparison', href: '#comparison' },
+    { name: 'How it Works', href: '#how-it-works' },
+  ],
+  showWaitlistButton = true 
+}: NavigationProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isDark, setIsDark] = useState(false);
@@ -30,12 +43,6 @@ export function Navigation() {
       document.body.classList.remove('dark');
     }
   }, [isDark]);
-
-  const navItems = [
-    { name: 'Rate Credits', href: '#rate-credits' },
-    { name: 'Comparison', href: '#comparison' },
-    { name: 'How it Works', href: '#how-it-works' },
-  ];
 
   const scrollToSection = (href: string) => {
     const element = document.querySelector(href);
@@ -63,47 +70,53 @@ export function Navigation() {
             transition={{ duration: isInitialized ? 0.1 : 0 }}
             className="flex items-center -ml-4 z-10"
           >
-            <span className="text-4xl font-bold text-gray-900 dark:text-white">CBX</span>
+            <Link href="/" className="text-4xl font-bold text-gray-900 dark:text-white hover:opacity-80 transition-opacity">
+              CBX
+            </Link>
           </motion.div>
 
           {/* Desktop Navigation - Center (absolutely centered) */}
-          <div className="hidden md:flex absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 items-center justify-center z-0">
-            <div className="flex items-center space-x-8">
-              {navItems.map((item, index) => (
-                <motion.button
-                  key={item.name}
-                  initial={false}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: isInitialized ? index * 0.02 : 0, duration: isInitialized ? 0.1 : 0 }}
-                  onClick={() => scrollToSection(item.href)}
-                  className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-100 font-medium"
-                >
-                  {item.name}
-                </motion.button>
-              ))}
+          {navItems.length > 0 && (
+            <div className="hidden md:flex absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 items-center justify-center z-0">
+              <div className="flex items-center space-x-8">
+                {navItems.map((item, index) => (
+                  <motion.button
+                    key={item.name}
+                    initial={false}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: isInitialized ? index * 0.02 : 0, duration: isInitialized ? 0.1 : 0 }}
+                    onClick={() => scrollToSection(item.href)}
+                    className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-100 font-medium"
+                  >
+                    {item.name}
+                  </motion.button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Right Side - Waitlist Button and Theme Toggle */}
           <div className="flex items-center space-x-4 mr-4">
             {/* Waitlist Button */}
-            <motion.button
-              initial={false}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: isInitialized ? 0.1 : 0 }}
-              onClick={scrollToWaitlist}
-              whileHover={{ scale: 1.02 }}
-              className="hidden md:flex items-center bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-2 rounded-full font-medium transition-all duration-100 mr-4 group"
-            >
-              <span style={{ color: '#04221b' }}>Waitlist</span>
-              <motion.div
-                className="ml-2"
-                whileHover={{ x: 2 }}
-                transition={{ duration: 0.1 }}
+            {showWaitlistButton && (
+              <motion.button
+                initial={false}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: isInitialized ? 0.1 : 0 }}
+                onClick={scrollToWaitlist}
+                whileHover={{ scale: 1.02 }}
+                className="hidden md:flex items-center bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-2 rounded-full font-medium transition-all duration-100 mr-4 group"
               >
-                <ArrowRight className="w-5 h-5" style={{ color: '#04221b' }} />
-              </motion.div>
-            </motion.button>
+                <span style={{ color: '#04221b' }}>Waitlist</span>
+                <motion.div
+                  className="ml-2"
+                  whileHover={{ x: 2 }}
+                  transition={{ duration: 0.1 }}
+                >
+                  <ArrowRight className="w-5 h-5" style={{ color: '#04221b' }} />
+                </motion.div>
+              </motion.button>
+            )}
 
             {/* Theme Toggle - Just Icon */}
             <button
@@ -142,13 +155,15 @@ export function Navigation() {
                   {item.name}
                 </button>
               ))}
-              <button
-                onClick={scrollToWaitlist}
-                className="flex items-center w-full px-3 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-md font-medium transition-colors duration-100"
-              >
-                <span style={{ color: '#0a531c' }}>Waitlist</span>
-                <ArrowRight className="ml-2 w-4 h-4" style={{ color: '#0a531c' }} />
-              </button>
+              {showWaitlistButton && (
+                <button
+                  onClick={scrollToWaitlist}
+                  className="flex items-center w-full px-3 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-md font-medium transition-colors duration-100"
+                >
+                  <span style={{ color: '#0a531c' }}>Waitlist</span>
+                  <ArrowRight className="ml-2 w-4 h-4" style={{ color: '#0a531c' }} />
+                </button>
+              )}
             </div>
           </motion.div>
         )}

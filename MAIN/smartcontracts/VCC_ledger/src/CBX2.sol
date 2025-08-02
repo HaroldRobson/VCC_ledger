@@ -1,5 +1,6 @@
-pragma solidity ^0.8.0;
 
+pragma solidity ^0.8.0;
+// added a view function getData() and changed the permissions of minting when compared to CBX.sol
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "forge-std/console.sol";
@@ -7,7 +8,7 @@ import "forge-std/console.sol";
 contract CBX is ERC20 {
     address public owner;
     address public seller;
-    uint256 public reserves; //This is in 100 times the total amount of tokens. IE 1 reserver = 0.01 token.
+    uint256 public reserves; //This is in 100 times the total amount of credits. IE 1 reserve = 0.01 credits.
     uint256 public pricePerToken; // IN 10^6 of a USD!!
     address USDC;
     uint256 public fee; // in basis points eg 300 = 3% fee. applied only to purchases
@@ -49,15 +50,40 @@ contract CBX is ERC20 {
         fee = _fee;
         USDCtokens = IERC20(USDC);
         initialMint(amountOfCredits, pricePerCredit);
-    }
+    } 
+
+    // <--MARK-->
+    // ZHANG THIS getData() function is for you
+                                                            
+    function getData() external view returns (uint256 Fee, // in bais points 
+                                              uint256 PricePerToken,
+                                              uint256 PricePerTokenWithFee,
+                                              uint256 Reserves,
+                                              uint256 rETIREMENT_GAS_FEE,
+                                              address Owner,
+                                              address Seller,
+                                              uint256 PendingRetirements, // number of retirements waiting to be processed
+                                              uint256 TotalOrdersRetired) {
+                Fee = fee;
+                PricePerToken = pricePerToken;
+                PricePerTokenWithFee = (pricePerToken * (1e4 + fee)) / 1e4;
+                Reserves = reserves;
+                rETIREMENT_GAS_FEE = RETIREMET_GAS_FEE;
+                Owner = owner;
+                Seller = seller;
+                PendingRetirements = pendingRetirementQueue.length;
+                TotalOrdersRetired = bundleCounter;
+                }
+
+
 
     function decimals() public view virtual override returns (uint8) {
         return 2;
     }
 
     function initialMint(uint256 amountOfCreditsIn, uint256 pricePayedPerNewCredit) private {
-        // pricePayedPerNewCredit is in USDC. Ie if we paid 10 dollars per credit it would be 10e6
-        // amount is the number of credits we purchased (Ie the number of Tonnes of CO2)
+        // pricePayedPerNewCredit is in USDC. Ie if we sold at 10 dollars per credit it would be 10e6
+        // amount is the number of credits Added to the pool (Ie the number of Tonnes of CO2)
         uint256 amountOfCBXIn = amountOfCreditsIn * 1e2;
         require(
             pricePayedPerNewCredit > 2e6,
@@ -71,7 +97,7 @@ contract CBX is ERC20 {
             newPrice = pricePayedPerNewCredit / 1e2;
         } else {
             newPrice = ((pricePerToken * reserves) + (pricePayedPerNewCredit * amountOfCBXIn / 1e2))
-                / (reserves + (amountOfCBXIn)); // update the new price of tokens in the pool to always be whatever they cost usjj
+                / (reserves + (amountOfCBXIn)); // update the new price of tokens in the pool to always be whatever they cost as a rolling average
         }
         pricePerToken = newPrice;
         uint256 newPricePerTokenWithFee = getUSDCPricePerCreditWithFee();
@@ -81,7 +107,7 @@ contract CBX is ERC20 {
         emit reserveOfCBXChanged(reserves);
     }
 
-    function mint(uint256 amountOfCreditsIn, uint256 pricePayedPerNewCredit) public onlySeller {
+    function mint(uint256 amountOfCreditsIn, uint256 pricePayedPerNewCredit) public onlyOwner { // realistcally sellers shoudl not be allowed to do this they would have to request us to 
         // pricePayedPerNewCredit is in USDC. Ie if we paid 10 dollars per credit it would be 10e6
         // amount is the number of credits we purchased (Ie the number of Tonnes of CO2)
         uint256 amountOfCBXIn = amountOfCreditsIn * 1e2;
@@ -129,13 +155,6 @@ contract CBX is ERC20 {
     }
 
     function withDrawUSDCProfits() public onlySeller {
-        console.log("Verifying USDC token address:", address(USDCtokens));
-        console.log("USDC TOTAL IN POOL:");
-        console.logUint(USDCtokens.balanceOf(address(this)));
-        console.log("SELLERS PROFITS");
-        console.logUint(sellerProfit);
-        console.log("FEES COLLECTED");
-        console.logUint(feesCollected);
         // require(sellerProfit + feesCollected >= USDCtokens.balanceOf(address(this)), "not enough usdc in pool"); // was causing integer division issues sadly - literally the same numbers would return false.
         USDCtokens.transfer(seller, sellerProfit);
         sellerProfit = 0;
@@ -215,12 +234,12 @@ contract CBX is ERC20 {
     function processRetirements() public onlyOwner { 
         require(pendingRetirementQueue.length != 0, "QUEUE IS TOO SMALL");
         uint8 maxBundleLength = uint8(pendingRetirementQueue.length);
-        if (pendingRetirementQueue.length < maxBundleLength) return;
         uint256 totalTokens = 0; // total tokens in our proposed bundle (will most likely NOT be divisble by 100)
         uint256 residue; // residue mod 100
         for (uint256 i = 0; i < maxBundleLength; i++) {
             totalTokens += pendingRetirementQueue[i].tokens;
         }
+        require(totalTokens >= 100, "NOT ENOUGH TOKENS IN QUEUE - TRY AGAIN LATER");
 
         residue = totalTokens % 100;
         uint256 totalToKeep = 0;

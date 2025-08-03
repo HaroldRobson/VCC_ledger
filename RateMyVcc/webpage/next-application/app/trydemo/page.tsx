@@ -47,7 +47,7 @@ export default function TryDemoPage() {
         await window.ethereum.request({
           method: 'wallet_addEthereumChain',
           params: [{
-            chainId: '0x1F4FB',
+            chainId: '0x1F47B',
             chainName: 'Etherlink Testnet',
             rpcUrls: ['https://node.ghostnet.etherlink.com'],
             nativeCurrency: {
@@ -187,7 +187,7 @@ export default function TryDemoPage() {
                     asChild 
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                   >
-                    <a href="https://faucet.ghostnet.teztnets.xyz/" target="_blank" rel="noopener noreferrer">
+                    <a href="https://faucet.etherlink.com/" target="_blank" rel="noopener noreferrer">
                       Get Faucet Tokens <Zap className="w-4 h-4 ml-2" />
                     </a>
                   </Button>

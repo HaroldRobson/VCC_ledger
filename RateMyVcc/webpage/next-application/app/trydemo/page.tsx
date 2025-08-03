@@ -71,7 +71,7 @@ export default function TryDemoPage() {
         <Navigation navItems={[]} showWaitlistButton={false} />
         
         {/* Hero Section */}
-        <section className="pt-32 pb-20 bg-white dark:bg-[#171717]">
+        <section className="pt-32 pb-12 bg-white dark:bg-[#171717]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               ref={titleAnimation.ref}
@@ -105,7 +105,7 @@ export default function TryDemoPage() {
         </section>
 
         {/* Setup Guide Section */}
-        <section className="py-24 bg-white dark:bg-[#171717]">
+        <section className="py-16 bg-white dark:bg-[#171717]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               ref={setupAnimation.ref}
@@ -215,97 +215,79 @@ export default function TryDemoPage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
                 {/* Buy DAPP */}
-                <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl p-8 border border-gray-200 dark:border-gray-800 shadow-lg">
-                  <div className="flex items-center mb-6">
-                    <div className="w-16 h-16 bg-green-500/20 rounded-2xl flex items-center justify-center mr-4">
-                      <ShoppingCart className="w-8 h-8 text-green-600 dark:text-green-400" />
+                <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl p-8 border border-gray-200 dark:border-gray-800">
+                  <div className="mb-8">
+                    <div className="flex items-center mb-4">
+                      <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-700/50 rounded-lg flex items-center justify-center mr-3">
+                        <span className="text-sm font-semibold text-green-700 dark:text-green-300">01</span>
+                      </div>
+                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Carbon Credit Marketplace</h3>
                     </div>
-                    <div>
-                      <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Carbon Credit Marketplace</h3>
-                      <p className="text-gray-600 dark:text-gray-400">Browse and purchase verified carbon credits</p>
-                    </div>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">Browse and purchase verified carbon credits</p>
                   </div>
 
-                  <div className="space-y-4 mb-8">
-                    <div className="flex items-start space-x-3">
-                      <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <h4 className="text-gray-900 dark:text-white font-medium">Live Carbon Credits</h4>
-                        <p className="text-gray-600 dark:text-gray-400 text-sm">Browse real VCS-verified carbon credit projects with transparent ratings</p>
-                      </div>
+                  <div className="space-y-5 mb-8">
+                    <div className="border-l-2 border-green-200 dark:border-green-700/50 pl-4">
+                      <h4 className="text-gray-900 dark:text-white font-medium mb-1">Live Carbon Credits</h4>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm">Browse real VCS-verified carbon credit projects with transparent ratings</p>
                     </div>
-                    <div className="flex items-start space-x-3">
-                      <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <h4 className="text-gray-900 dark:text-white font-medium">Instant Settlement</h4>
-                        <p className="text-gray-600 dark:text-gray-400 text-sm">Purchase any amount (as low as 0.01 tonnes) with immediate on-chain settlement</p>
-                      </div>
+                    <div className="border-l-2 border-green-200 dark:border-green-700/50 pl-4">
+                      <h4 className="text-gray-900 dark:text-white font-medium mb-1">Instant Settlement</h4>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm">Purchase any amount (as low as 0.01 tonnes) with immediate on-chain settlement</p>
                     </div>
-                    <div className="flex items-start space-x-3">
-                      <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <h4 className="text-gray-900 dark:text-white font-medium">Low Fees</h4>
-                        <p className="text-gray-600 dark:text-gray-400 text-sm">0.5-2% total fees vs 20-40% with traditional brokers</p>
-                      </div>
+                    <div className="border-l-2 border-green-200 dark:border-green-700/50 pl-4">
+                      <h4 className="text-gray-900 dark:text-white font-medium mb-1">Low Fees</h4>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm">0.5-2% total fees vs 20-40% with traditional brokers</p>
                     </div>
                   </div>
 
                   <Button 
                     asChild 
-                    className="w-full bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-600/25"
+                    className="w-full bg-green-600 hover:bg-green-700 text-white"
                     size="lg"
                   >
                     <a href="https://buy.cbx.earth" target="_blank" rel="noopener noreferrer">
-                      Try Marketplace <ArrowRight className="w-5 h-5 ml-2" />
+                      Try Marketplace <ArrowRight className="w-4 h-4 ml-2" />
                     </a>
                   </Button>
                 </div>
 
                 {/* Receipts DAPP */}
-                <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl p-8 border border-gray-200 dark:border-gray-800 shadow-lg">
-                  <div className="flex items-center mb-6">
-                    <div className="w-16 h-16 bg-blue-500/20 rounded-2xl flex items-center justify-center mr-4">
-                      <Receipt className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl p-8 border border-gray-200 dark:border-gray-800">
+                  <div className="mb-8">
+                    <div className="flex items-center mb-4">
+                      <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-700/50 rounded-lg flex items-center justify-center mr-3">
+                        <span className="text-sm font-semibold text-green-700 dark:text-green-300">02</span>
+                      </div>
+                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Retirement Receipts</h3>
                     </div>
-                    <div>
-                      <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Retirement Receipts</h3>
-                      <p className="text-gray-600 dark:text-gray-400">View immutable NFT receipts</p>
-                    </div>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">View immutable NFT receipts</p>
                   </div>
 
-                  <div className="space-y-4 mb-8">
-                    <div className="flex items-start space-x-3">
-                      <CheckCircle className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <h4 className="text-gray-900 dark:text-white font-medium">NFT Receipts</h4>
-                        <p className="text-gray-600 dark:text-gray-400 text-sm">Each retirement generates an immutable NFT receipt as proof</p>
-                      </div>
+                  <div className="space-y-5 mb-8">
+                    <div className="border-l-2 border-green-200 dark:border-green-700/50 pl-4">
+                      <h4 className="text-gray-900 dark:text-white font-medium mb-1">NFT Receipts</h4>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm">Each retirement generates an immutable NFT receipt as proof</p>
                     </div>
-                    <div className="flex items-start space-x-3">
-                      <CheckCircle className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <h4 className="text-gray-900 dark:text-white font-medium">Full Transparency</h4>
-                        <p className="text-gray-600 dark:text-gray-400 text-sm">View complete transaction history and project details on-chain</p>
-                      </div>
+                    <div className="border-l-2 border-green-200 dark:border-green-700/50 pl-4">
+                      <h4 className="text-gray-900 dark:text-white font-medium mb-1">Full Transparency</h4>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm">View complete transaction history and project details on-chain</p>
                     </div>
-                    <div className="flex items-start space-x-3">
-                      <CheckCircle className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <h4 className="text-gray-900 dark:text-white font-medium">Tamper-Proof</h4>
-                        <p className="text-gray-600 dark:text-gray-400 text-sm">Unlike PDF certificates, blockchain receipts cannot be forged</p>
-                      </div>
+                    <div className="border-l-2 border-green-200 dark:border-green-700/50 pl-4">
+                      <h4 className="text-gray-900 dark:text-white font-medium mb-1">Tamper-Proof</h4>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm">Unlike PDF certificates, blockchain receipts cannot be forged</p>
                     </div>
                   </div>
 
                   <Button 
                     asChild 
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/25"
+                    className="w-full bg-green-600 hover:bg-green-700 text-white"
                     size="lg"
                   >
                     <a href="https://receipts.cbx.earth" target="_blank" rel="noopener noreferrer">
-                      View Receipts <ArrowRight className="w-5 h-5 ml-2" />
+                      View Receipts <ArrowRight className="w-4 h-4 ml-2" />
                     </a>
                   </Button>
                 </div>
@@ -332,45 +314,59 @@ export default function TryDemoPage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div className="text-center">
-                  <div className="w-20 h-20 bg-green-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <ShoppingCart className="w-10 h-10 text-green-600 dark:text-green-400" />
+              <div className="max-w-5xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-6">
+                  <div className="relative">
+                    <div className="text-center">
+                      <div className="w-12 h-12 bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-700/50 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span className="text-xl font-bold text-green-700 dark:text-green-300">01</span>
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Browse & Buy</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                        Explore verified carbon credit projects and purchase the exact amount you need
+                      </p>
+                    </div>
+                    {/* Connector line - hidden on mobile, visible on md+ */}
+                    <div className="hidden md:block absolute top-6 left-full w-full h-0.5 bg-gradient-to-r from-green-200 to-transparent dark:from-green-700/50 dark:to-transparent transform -translate-y-0.5 lg:w-8 lg:left-[calc(100%+1rem)]"></div>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">1. Browse & Buy</h3>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Explore verified carbon credit projects and purchase the exact amount you need
-                  </p>
-                </div>
 
-                <div className="text-center">
-                  <div className="w-20 h-20 bg-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <Zap className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+                  <div className="relative">
+                    <div className="text-center">
+                      <div className="w-12 h-12 bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-700/50 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span className="text-xl font-bold text-green-700 dark:text-green-300">02</span>
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Instant Settlement</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                        Credits are transferred to your wallet immediately upon payment
+                      </p>
+                    </div>
+                    {/* Connector line - hidden on mobile, visible on lg+ */}
+                    <div className="hidden lg:block absolute top-6 left-[calc(100%+1rem)] w-8 h-0.5 bg-gradient-to-r from-green-200 to-transparent dark:from-green-700/50 dark:to-transparent transform -translate-y-0.5"></div>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">2. Instant Settlement</h3>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Credits are transferred to your wallet immediately upon payment
-                  </p>
-                </div>
 
-                <div className="text-center">
-                  <div className="w-20 h-20 bg-purple-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <Receipt className="w-10 h-10 text-purple-600 dark:text-purple-400" />
+                  <div className="relative">
+                    <div className="text-center">
+                      <div className="w-12 h-12 bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-700/50 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span className="text-xl font-bold text-green-700 dark:text-green-300">03</span>
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Retire Credits</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                        Permanently retire credits to offset your carbon footprint
+                      </p>
+                    </div>
+                    {/* Connector line - hidden on mobile, visible on lg+ */}
+                    <div className="hidden lg:block absolute top-6 left-[calc(100%+1rem)] w-8 h-0.5 bg-gradient-to-r from-green-200 to-transparent dark:from-green-700/50 dark:to-transparent transform -translate-y-0.5"></div>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">3. Retire Credits</h3>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Permanently retire credits to offset your carbon footprint
-                  </p>
-                </div>
 
-                <div className="text-center">
-                  <div className="w-20 h-20 bg-orange-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <CheckCircle className="w-10 h-10 text-orange-600 dark:text-orange-400" />
+                  <div className="text-center">
+                    <div className="w-12 h-12 bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-700/50 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <span className="text-xl font-bold text-green-700 dark:text-green-300">04</span>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Get NFT Receipt</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                      Receive an immutable NFT as proof of your environmental impact
+                    </p>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">4. Get NFT Receipt</h3>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Receive an immutable NFT as proof of your environmental impact
-                  </p>
                 </div>
               </div>
             </motion.div>

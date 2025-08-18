@@ -102,6 +102,32 @@ export async function POST(request: NextRequest) {
 
     const sheets = google.sheets({ version: 'v4', auth });
 
+    // Check if email already exists
+    console.log('Checking for existing emails...');
+    
+    try {
+      const existingData = await sheets.spreadsheets.values.get({
+        spreadsheetId: cleanSheetId,
+        range: 'Sheet1!A:A', // Get all emails from column A
+      });
+
+      const existingEmails = existingData.data.values 
+        ? existingData.data.values.flat().map(email => email.toLowerCase().trim())
+        : [];
+
+      // Check if the email already exists (case-insensitive)
+      if (existingEmails.includes(email.toLowerCase().trim())) {
+        console.log('Email already exists, skipping insertion:', email);
+        // Return success without error - email already in list
+        return NextResponse.json(
+          { message: 'Email successfully added to waitlist' },
+          { status: 200 }
+        );
+      }
+    } catch (readError) {
+      console.log('Could not read existing emails (sheet might be empty), proceeding with insertion');
+    }
+
     // Get current timestamp
     const timestamp = new Date().toISOString();
 

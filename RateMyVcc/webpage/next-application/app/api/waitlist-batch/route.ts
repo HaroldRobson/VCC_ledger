@@ -82,10 +82,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Clean the service account email and sheet ID (remove quotes)
+    const cleanEmail = GOOGLE_SERVICE_ACCOUNT_EMAIL.replace(/^["']|["']$/g, '');
+    const cleanSheetId = GOOGLE_SHEET_ID.replace(/^["']|["']$/g, '');
+
     // Create Google Sheets client
     const auth = new google.auth.GoogleAuth({
       credentials: {
-        client_email: GOOGLE_SERVICE_ACCOUNT_EMAIL,
+        client_email: cleanEmail,
         private_key: privateKey,
       },
       scopes: ['https://www.googleapis.com/auth/spreadsheets'],
@@ -93,15 +97,52 @@ export async function POST(request: NextRequest) {
 
     const sheets = google.sheets({ version: 'v4', auth });
 
+    // Check for existing emails
+    console.log('Checking for existing emails in batch operation...');
+    
+    let existingEmails: string[] = [];
+    try {
+      const existingData = await sheets.spreadsheets.values.get({
+        spreadsheetId: cleanSheetId,
+        range: 'Sheet1!A:A', // Get all emails from column A
+      });
+
+      existingEmails = existingData.data.values 
+        ? existingData.data.values.flat().map(email => email.toLowerCase().trim())
+        : [];
+    } catch (readError) {
+      console.log('Could not read existing emails (sheet might be empty), proceeding with insertion');
+    }
+
+    // Filter out emails that already exist
+    const newEmails = validEmails.filter(email => 
+      !existingEmails.includes(email.toLowerCase().trim())
+    );
+
+    // If no new emails to add, return success
+    if (newEmails.length === 0) {
+      console.log('All emails already exist, no new emails to add');
+      return NextResponse.json(
+        { 
+          message: `${validEmails.length} emails successfully added to waitlist`,
+          processed: validEmails.length,
+          skipped: emails.length - validEmails.length,
+          newEmails: 0,
+          duplicates: validEmails.length
+        },
+        { status: 200 }
+      );
+    }
+
     // Get current timestamp
     const timestamp = new Date().toISOString();
 
-    // Prepare batch data
-    const values = validEmails.map(email => [email, timestamp]);
+    // Prepare batch data with only new emails
+    const values = newEmails.map(email => [email, timestamp]);
 
     // Batch append to the sheet
     await sheets.spreadsheets.values.append({
-      spreadsheetId: GOOGLE_SHEET_ID,
+      spreadsheetId: cleanSheetId,
       range: 'Sheet1!A:B',
       valueInputOption: 'USER_ENTERED',
       requestBody: {
@@ -111,9 +152,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { 
-        message: `${validEmails.length} emails successfully added to waitlist`,
-        processed: validEmails.length,
-        skipped: emails.length - validEmails.length
+        message: `${newEmails.length} new emails successfully added to waitlist`,
+        processed: newEmails.length,
+        skipped: emails.length - validEmails.length,
+        duplicates: validEmails.length - newEmails.length
       },
       { status: 200 }
     );

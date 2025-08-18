@@ -9,12 +9,21 @@ function isValidEmail(email: string): boolean {
 
 export async function POST(request: NextRequest) {
   try {
-    const { email } = await request.json();
+    const { emails } = await request.json();
 
-    // Validate email
-    if (!email || !isValidEmail(email)) {
+    // Validate input
+    if (!emails || !Array.isArray(emails) || emails.length === 0) {
       return NextResponse.json(
-        { error: 'Valid email address is required' },
+        { error: 'Valid emails array is required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate all emails
+    const validEmails = emails.filter(email => email && isValidEmail(email));
+    if (validEmails.length === 0) {
+      return NextResponse.json(
+        { error: 'No valid email addresses provided' },
         { status: 400 }
       );
     }
@@ -37,12 +46,10 @@ export async function POST(request: NextRequest) {
     // Clean and format the private key
     let privateKey = GOOGLE_PRIVATE_KEY;
     
-    // Handle different private key formats
     if (privateKey.includes('\\n')) {
       privateKey = privateKey.replace(/\\n/g, '\n');
     }
     
-    // Ensure the key has proper headers and footers
     if (!privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
       console.error('Private key missing proper headers');
       return NextResponse.json(
@@ -65,13 +72,13 @@ export async function POST(request: NextRequest) {
     // Get current timestamp
     const timestamp = new Date().toISOString();
 
-    // Prepare the data to append
-    const values = [[email, timestamp]];
+    // Prepare batch data
+    const values = validEmails.map(email => [email, timestamp]);
 
-    // Append to the sheet
+    // Batch append to the sheet
     await sheets.spreadsheets.values.append({
       spreadsheetId: GOOGLE_SHEET_ID,
-      range: 'Sheet1!A:B', // Assumes columns A (email) and B (timestamp)
+      range: 'Sheet1!A:B',
       valueInputOption: 'USER_ENTERED',
       requestBody: {
         values,
@@ -79,15 +86,18 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(
-      { message: 'Email successfully added to waitlist' },
+      { 
+        message: `${validEmails.length} emails successfully added to waitlist`,
+        processed: validEmails.length,
+        skipped: emails.length - validEmails.length
+      },
       { status: 200 }
     );
 
   } catch (error) {
-    console.error('Error adding email to waitlist:', error);
+    console.error('Error adding emails to waitlist:', error);
     
-    // Provide more specific error messages
-    let errorMessage = 'Failed to add email to waitlist';
+    let errorMessage = 'Failed to add emails to waitlist';
     
     if (error instanceof Error) {
       if (error.message.includes('DECODER routines')) {
@@ -106,7 +116,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Handle OPTIONS request for CORS
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,

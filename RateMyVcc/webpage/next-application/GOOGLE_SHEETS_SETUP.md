@@ -55,6 +55,15 @@ Open the downloaded JSON file and find these values:
 - `client_email` - this is your `GOOGLE_SERVICE_ACCOUNT_EMAIL`
 - `private_key` - this is your `GOOGLE_PRIVATE_KEY`
 
+**Critical**: The `private_key` in the JSON file will look like this:
+```json
+{
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC...\n-----END PRIVATE KEY-----\n"
+}
+```
+
+When setting the environment variable, use the **exact** string including the `\n` characters.
+
 ## Step 6: Share Sheet with Service Account
 
 1. Go back to your Google Sheet
@@ -73,6 +82,11 @@ GOOGLE_SERVICE_ACCOUNT_EMAIL=your-service-account@your-project.iam.gserviceaccou
 GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY_HERE\n-----END PRIVATE KEY-----"
 GOOGLE_SHEET_ID=your_google_sheet_id_from_url
 ```
+
+**Important**: For the `GOOGLE_PRIVATE_KEY`:
+- Copy the entire private key from the JSON file (including `-----BEGIN PRIVATE KEY-----` and `-----END PRIVATE KEY-----`)
+- Keep it all on one line with `\n` where the line breaks should be
+- Wrap the entire key in double quotes
 
 ### For Production (Vercel)
 1. Go to your Vercel project settings
@@ -96,9 +110,12 @@ Set the environment variables according to your hosting platform's documentation
 
 ### Common Issues
 
-1. **"Error: No key or keyFile set"**
+1. **"Error: No key or keyFile set"** or **"DECODER routines::unsupported"**
    - Make sure `GOOGLE_PRIVATE_KEY` is set correctly
    - Ensure the private key includes the `\n` characters for line breaks
+   - Verify the key starts with `-----BEGIN PRIVATE KEY-----` and ends with `-----END PRIVATE KEY-----`
+   - Copy the key exactly as it appears in the JSON file
+   - In Vercel, paste the key with literal `\n` characters (not actual line breaks)
 
 2. **"Error: The caller does not have permission"**
    - Make sure you shared the Google Sheet with the service account email

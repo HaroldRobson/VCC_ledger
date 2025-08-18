@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, CheckCircle, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,41 +11,116 @@ export function WaitlistSection() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isValidEmailFormat, setIsValidEmailFormat] = useState(true);
   
   const mainAnimation = useAnimateOnce<HTMLDivElement>();
   const titleAnimation = useAnimateOnce<HTMLHeadingElement>();
   const descriptionAnimation = useAnimateOnce<HTMLParagraphElement>();
   const formAnimation = useAnimateOnce<HTMLFormElement>();
 
+  // Retry failed submissions on component mount
+  useEffect(() => {
+    const retryFailedSubmissions = () => {
+      const failedEmails = JSON.parse(localStorage.getItem('failedEmailSubmissions') || '[]');
+      if (failedEmails.length > 0) {
+        console.log(`Retrying ${failedEmails.length} failed email submissions...`);
+        failedEmails.forEach((submission: any) => {
+          submitEmailInBackground(submission.email);
+        });
+      }
+    };
+
+    // Retry failed submissions after a short delay
+    const timeout = setTimeout(retryFailedSubmissions, 2000);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  // Client-side email validation
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Handle email input change with real-time validation
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newEmail = e.target.value;
+    setEmail(newEmail);
+    setError(''); // Clear any previous errors
+    
+    // Real-time validation
+    if (newEmail.trim() === '') {
+      setIsValidEmailFormat(true); // Don't show error for empty field
+    } else {
+      setIsValidEmailFormat(isValidEmail(newEmail.trim()));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
 
+    const emailToSubmit = email.trim();
+    
+    // Quick client-side validation
+    if (!isValidEmail(emailToSubmit)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+    
+    // Immediate optimistic UI update
     setIsLoading(true);
     setError('');
     
+    // Quick validation and immediate success feedback
+    setTimeout(() => {
+      setIsSubmitted(true);
+      setEmail('');
+      setIsLoading(false);
+    }, 50); // Even faster feedback
+    
+    // Background processing - don't await this
+    submitEmailInBackground(emailToSubmit);
+  };
+
+  const submitEmailInBackground = async (email: string) => {
     try {
       const response = await fetch('/api/waitlist', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({ email }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to join waitlist');
+        console.error('Background submission failed:', data.error);
+        // Store in localStorage for retry later
+        const failedEmails = JSON.parse(localStorage.getItem('failedEmailSubmissions') || '[]');
+        failedEmails.push({
+          email,
+          timestamp: new Date().toISOString(),
+          error: data.error
+        });
+        localStorage.setItem('failedEmailSubmissions', JSON.stringify(failedEmails));
+      } else {
+        console.log('Email successfully submitted to Google Sheets');
+        // Remove from failed submissions if it was there
+        const failedEmails = JSON.parse(localStorage.getItem('failedEmailSubmissions') || '[]');
+        const filteredEmails = failedEmails.filter((item: any) => item.email !== email);
+        localStorage.setItem('failedEmailSubmissions', JSON.stringify(filteredEmails));
       }
-
-      setIsSubmitted(true);
-      setEmail('');
     } catch (err) {
-      console.error('Error submitting email:', err);
-      setError(err instanceof Error ? err.message : 'Failed to join waitlist. Please try again.');
-    } finally {
-      setIsLoading(false);
+      console.error('Background email submission error:', err);
+      // Store in localStorage for retry later
+      const failedEmails = JSON.parse(localStorage.getItem('failedEmailSubmissions') || '[]');
+      failedEmails.push({
+        email,
+        timestamp: new Date().toISOString(),
+        error: err instanceof Error ? err.message : 'Network error'
+      });
+      localStorage.setItem('failedEmailSubmissions', JSON.stringify(failedEmails));
     }
   };
 
@@ -99,15 +174,20 @@ export function WaitlistSection() {
                     autoComplete="off"
                     placeholder="Enter your email address"
                     value={email}
-                    // defaultValue={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={handleEmailChange}
                     required
-                    className="w-full pl-6 pr-6 py-4 bg-white dark:bg-[#232323] border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 focus:border-green-500 focus:outline-none text-lg"
+                    className={`w-full pl-6 pr-6 py-4 bg-white dark:bg-[#232323] border rounded-xl text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none text-lg transition-colors ${
+                      email.trim() === '' 
+                        ? 'border-gray-300 dark:border-gray-600 focus:border-green-500' 
+                        : isValidEmailFormat 
+                          ? 'border-green-400 dark:border-green-500 focus:border-green-500' 
+                          : 'border-red-400 dark:border-red-500 focus:border-red-500'
+                    }`}
                   />
                 </div>
                 <Button
                   type="submit"
-                  disabled={isLoading || !email.trim()}
+                  disabled={isLoading || !email.trim() || !isValidEmailFormat}
                   className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 text-lg flex items-center justify-center whitespace-nowrap h-[60px]"
                 >
                   {isLoading ? (

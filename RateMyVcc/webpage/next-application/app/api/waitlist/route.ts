@@ -26,8 +26,20 @@ export async function POST(request: NextRequest) {
       GOOGLE_SHEET_ID,
     } = process.env;
 
+    // Debug: Log environment variables (production debugging)
+    console.log('Environment check:');
+    console.log('GOOGLE_SERVICE_ACCOUNT_EMAIL exists:', !!GOOGLE_SERVICE_ACCOUNT_EMAIL);
+    console.log('GOOGLE_PRIVATE_KEY exists:', !!GOOGLE_PRIVATE_KEY);
+    console.log('GOOGLE_SHEET_ID exists:', !!GOOGLE_SHEET_ID);
+    console.log('GOOGLE_SHEET_ID value:', GOOGLE_SHEET_ID || 'MISSING');
+    console.log('All env vars:', Object.keys(process.env).filter(key => key.startsWith('GOOGLE_')));
+
     if (!GOOGLE_SERVICE_ACCOUNT_EMAIL || !GOOGLE_PRIVATE_KEY || !GOOGLE_SHEET_ID) {
-      console.error('Missing required environment variables');
+      console.error('Missing required environment variables:');
+      console.error('GOOGLE_SERVICE_ACCOUNT_EMAIL:', !!GOOGLE_SERVICE_ACCOUNT_EMAIL);
+      console.error('GOOGLE_PRIVATE_KEY:', !!GOOGLE_PRIVATE_KEY);
+      console.error('GOOGLE_SHEET_ID:', !!GOOGLE_SHEET_ID);
+      console.error('GOOGLE_SHEET_ID value:', GOOGLE_SHEET_ID ? `${GOOGLE_SHEET_ID.substring(0, 10)}...` : 'undefined');
       return NextResponse.json(
         { error: 'Server configuration error' },
         { status: 500 }
@@ -86,6 +98,9 @@ export async function POST(request: NextRequest) {
     // Prepare the data to append
     const values = [[email, timestamp]];
 
+    // Debug: Log the sheet ID being used
+    console.log('Attempting to append to sheet ID:', GOOGLE_SHEET_ID);
+    
     // Append to the sheet
     await sheets.spreadsheets.values.append({
       spreadsheetId: GOOGLE_SHEET_ID,
@@ -104,6 +119,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error adding email to waitlist:', error);
     
+    // Get environment variables for error reporting
+    const { GOOGLE_SHEET_ID } = process.env;
+    
     // Provide more specific error messages
     let errorMessage = 'Failed to add email to waitlist';
     
@@ -112,8 +130,8 @@ export async function POST(request: NextRequest) {
         errorMessage = 'Invalid private key format. Please check your GOOGLE_PRIVATE_KEY environment variable.';
       } else if (error.message.includes('permission')) {
         errorMessage = 'Permission denied. Make sure the service account has access to the Google Sheet.';
-      } else if (error.message.includes('not found')) {
-        errorMessage = 'Google Sheet not found. Please check your GOOGLE_SHEET_ID.';
+      } else if (error.message.includes('not found') || error.message.includes('Requested entity was not found')) {
+        errorMessage = `Google Sheet not found. Sheet ID: '${GOOGLE_SHEET_ID || 'undefined'}'. Error details: ${error.message}`;
       }
     }
     

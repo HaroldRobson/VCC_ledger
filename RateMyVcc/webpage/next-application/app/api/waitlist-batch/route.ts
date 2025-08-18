@@ -36,7 +36,11 @@ export async function POST(request: NextRequest) {
     } = process.env;
 
     if (!GOOGLE_SERVICE_ACCOUNT_EMAIL || !GOOGLE_PRIVATE_KEY || !GOOGLE_SHEET_ID) {
-      console.error('Missing required environment variables');
+      console.error('Missing required environment variables:');
+      console.error('GOOGLE_SERVICE_ACCOUNT_EMAIL:', !!GOOGLE_SERVICE_ACCOUNT_EMAIL);
+      console.error('GOOGLE_PRIVATE_KEY:', !!GOOGLE_PRIVATE_KEY);
+      console.error('GOOGLE_SHEET_ID:', !!GOOGLE_SHEET_ID);
+      console.error('GOOGLE_SHEET_ID value:', GOOGLE_SHEET_ID ? `${GOOGLE_SHEET_ID.substring(0, 10)}...` : 'undefined');
       return NextResponse.json(
         { error: 'Server configuration error' },
         { status: 500 }

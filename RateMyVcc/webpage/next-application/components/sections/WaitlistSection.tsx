@@ -10,6 +10,7 @@ export function WaitlistSection() {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   
   const mainAnimation = useAnimateOnce<HTMLDivElement>();
   const titleAnimation = useAnimateOnce<HTMLHeadingElement>();
@@ -21,13 +22,31 @@ export function WaitlistSection() {
     if (!email.trim()) return;
 
     setIsLoading(true);
+    setError('');
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    setIsSubmitted(true);
-    setIsLoading(false);
-    setEmail('');
+    try {
+      const response = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to join waitlist');
+      }
+
+      setIsSubmitted(true);
+      setEmail('');
+    } catch (err) {
+      console.error('Error submitting email:', err);
+      setError(err instanceof Error ? err.message : 'Failed to join waitlist. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -68,6 +87,11 @@ export function WaitlistSection() {
               onSubmit={handleSubmit}
               className="max-w-4xl mx-auto"
             >
+              {error && (
+                <div className="mb-4 p-4 bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-700 rounded-lg">
+                  <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
+                </div>
+              )}
               <div className="flex flex-col md:flex-row gap-4 items-stretch">
                 <div className="flex-1 relative">
                   <input

@@ -57,6 +57,16 @@ export async function POST(request: NextRequest) {
     // Remove extra quotes if present (common in Vercel env vars)
     privateKey = privateKey.replace(/^["']|["']$/g, '');
     
+    // Clean the service account email (remove quotes)
+    const cleanEmail = GOOGLE_SERVICE_ACCOUNT_EMAIL.replace(/^["']|["']$/g, '');
+    
+    // Clean the sheet ID (remove quotes)  
+    const cleanSheetId = GOOGLE_SHEET_ID.replace(/^["']|["']$/g, '');
+    
+    console.log('Cleaned values:');
+    console.log('Service Account Email:', cleanEmail);
+    console.log('Sheet ID:', cleanSheetId);
+    
     // Add proper formatting if it's a raw key without headers
     if (!privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
       // Check if it's a base64 encoded key without headers
@@ -84,7 +94,7 @@ export async function POST(request: NextRequest) {
     // Create Google Sheets client
     const auth = new google.auth.GoogleAuth({
       credentials: {
-        client_email: GOOGLE_SERVICE_ACCOUNT_EMAIL,
+        client_email: cleanEmail,
         private_key: privateKey,
       },
       scopes: ['https://www.googleapis.com/auth/spreadsheets'],
@@ -99,11 +109,11 @@ export async function POST(request: NextRequest) {
     const values = [[email, timestamp]];
 
     // Debug: Log the sheet ID being used
-    console.log('Attempting to append to sheet ID:', GOOGLE_SHEET_ID);
+    console.log('Attempting to append to sheet ID:', cleanSheetId);
     
     // Append to the sheet
     await sheets.spreadsheets.values.append({
-      spreadsheetId: GOOGLE_SHEET_ID,
+      spreadsheetId: cleanSheetId,
       range: 'Sheet1!A:B', // Assumes columns A (email) and B (timestamp)
       valueInputOption: 'USER_ENTERED',
       requestBody: {

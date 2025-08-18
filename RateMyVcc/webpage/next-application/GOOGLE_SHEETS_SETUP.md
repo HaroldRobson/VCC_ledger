@@ -92,9 +92,28 @@ GOOGLE_SHEET_ID=your_google_sheet_id_from_url
 1. Go to your Vercel project settings
 2. Navigate to "Environment Variables"
 3. Add each variable:
-   - `GOOGLE_SERVICE_ACCOUNT_EMAIL`
-   - `GOOGLE_PRIVATE_KEY` (make sure to wrap in quotes and include `\n` for line breaks)
-   - `GOOGLE_SHEET_ID`
+   - `GOOGLE_SERVICE_ACCOUNT_EMAIL` → Paste the email directly
+   - `GOOGLE_SHEET_ID` → Paste the sheet ID directly
+   - `GOOGLE_PRIVATE_KEY` → **CRITICAL**: See detailed instructions below
+
+#### Setting GOOGLE_PRIVATE_KEY in Vercel:
+**Method 1 (Recommended):**
+1. Copy the entire `private_key` value from your JSON file (including quotes)
+2. Paste it directly into Vercel (with the `\n` characters as literal text)
+3. Example: `"-----BEGIN PRIVATE KEY-----\nMIIEvgIB...\n-----END PRIVATE KEY-----\n"`
+
+**Method 2 (If Method 1 fails):**
+1. Remove the outer quotes from the private key
+2. Replace `\n` with actual line breaks
+3. Should look like:
+```
+-----BEGIN PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC...
+-----END PRIVATE KEY-----
+```
+
+**Method 3 (Advanced):**
+Use Vercel CLI: `vercel env add GOOGLE_PRIVATE_KEY`
 
 ### For Production (Other Platforms)
 Set the environment variables according to your hosting platform's documentation.

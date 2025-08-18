@@ -37,16 +37,34 @@ export async function POST(request: NextRequest) {
     // Clean and format the private key
     let privateKey = GOOGLE_PRIVATE_KEY;
     
-    // Handle different private key formats
+    // Handle different private key formats (development vs production)
     if (privateKey.includes('\\n')) {
       privateKey = privateKey.replace(/\\n/g, '\n');
     }
     
-    // Ensure the key has proper headers and footers
+    // Remove extra quotes if present (common in Vercel env vars)
+    privateKey = privateKey.replace(/^["']|["']$/g, '');
+    
+    // Add proper formatting if it's a raw key without headers
     if (!privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
-      console.error('Private key missing proper headers');
+      // Check if it's a base64 encoded key without headers
+      if (privateKey.length > 100 && !privateKey.includes('\n')) {
+        // This might be a raw base64 key, try to format it
+        console.error('Private key appears to be missing headers. Expected format: -----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----');
+      }
+      
+      console.error('Private key missing proper headers. Key preview:', privateKey.substring(0, 50) + '...');
       return NextResponse.json(
-        { error: 'Invalid private key format' },
+        { error: 'Invalid private key format. Make sure the key includes -----BEGIN PRIVATE KEY----- and -----END PRIVATE KEY----- headers.' },
+        { status: 500 }
+      );
+    }
+    
+    // Validate the key format
+    if (!privateKey.includes('-----END PRIVATE KEY-----')) {
+      console.error('Private key missing footer');
+      return NextResponse.json(
+        { error: 'Invalid private key format. Missing -----END PRIVATE KEY----- footer.' },
         { status: 500 }
       );
     }

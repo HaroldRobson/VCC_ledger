@@ -92,16 +92,28 @@ export function WaitlistSection() {
         body: JSON.stringify({ email }),
       });
 
-      const data = await response.json();
+      // Check if response has content before trying to parse JSON
+      let data = null;
+      const contentType = response.headers.get('content-type');
+      
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        // Response is not JSON, get as text for debugging
+        const textResponse = await response.text();
+        console.error('Non-JSON response:', textResponse);
+        throw new Error(`Server returned ${response.status}: ${textResponse || 'Unknown error'}`);
+      }
 
       if (!response.ok) {
-        console.error('Background submission failed:', data.error);
+        console.error('Background submission failed:', data?.error || 'Unknown error');
         // Store in localStorage for retry later
         const failedEmails = JSON.parse(localStorage.getItem('failedEmailSubmissions') || '[]');
         failedEmails.push({
           email,
           timestamp: new Date().toISOString(),
-          error: data.error
+          error: data?.error || `HTTP ${response.status}`,
+          status: response.status
         });
         localStorage.setItem('failedEmailSubmissions', JSON.stringify(failedEmails));
       } else {

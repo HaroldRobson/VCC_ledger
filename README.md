@@ -41,3 +41,7 @@
 - When we receive the **retirement receipt** from Verra, we send **NFTs** of it to the owners.
 - In the NFT's metadata, the fractional amount of carbon offsets retired by its owner is recorded.
 - We call this process "splitting the retirement receipt".
+
+### Find out more
+ - our official whitepaper is FractionalRetirment.pdf contained in this directory
+ - try out our website and demo here: https://cbx.earth
